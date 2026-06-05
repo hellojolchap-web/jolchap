@@ -1,0 +1,90 @@
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+
+/** Shape of the cookie array Supabase hands to `setAll`. */
+type CookieToSet = { name: string; value: string; options: CookieOptions };
+
+/**
+ * Refreshes the Supabase auth session on every admin request and gates access.
+ *
+ * Behaviour:
+ *  • `/admin/login` is always reachable (so unauthenticated users can sign in).
+ *  • Every other `/admin/*` route requires an authenticated Supabase user.
+ *  • If Supabase env vars are missing we treat the visitor as unauthenticated
+ *    and send them to the login page (which renders a "connect Supabase" card).
+ *
+ * The cookie plumbing mirrors the @supabase/ssr middleware pattern so the
+ * refreshed session is written back onto the outgoing response.
+ */
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const isLoginRoute = pathname === "/admin/login";
+
+  // Response we will mutate cookies onto and ultimately return.
+  let response = NextResponse.next({ request });
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+
+  // Without credentials we can't authenticate anyone — allow only the login page.
+  if (!url || !anonKey) {
+    if (isLoginRoute) return response;
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/admin/login";
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  const supabase = createServerClient(url, anonKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet: CookieToSet[]) {
+        cookiesToSet.forEach(({ name, value }) => {
+          request.cookies.set(name, value);
+        });
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options);
+        });
+      },
+    },
+  });
+
+  // IMPORTANT: getUser() revalidates the token with Supabase (getSession() does not).
+  let isAuthenticated = false;
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    isAuthenticated = Boolean(user);
+  } catch {
+    isAuthenticated = false;
+  }
+
+  // Signed-in users shouldn't sit on the login screen.
+  if (isLoginRoute) {
+    if (isAuthenticated) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/admin";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
+    return response;
+  }
+
+  // Every other admin route requires authentication.
+  if (!isAuthenticated) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/admin/login";
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  return response;
+}
+
+export const config = {
+  matcher: ["/admin/:path*"],
+};

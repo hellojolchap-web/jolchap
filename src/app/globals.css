@@ -1,0 +1,211 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Jolchap — global stylesheet
+   Two-colour brand system: Teal (#0E8388) + Ink (#16212B)
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --brand: 14 131 136; /* jol teal-500 */
+  --brand-strong: 13 86 90; /* teal-700    */
+  --ink: 12 20 27; /* ink-950     */
+  --bone: 247 244 239; /* cream       */
+
+  --header-h: 88px;
+  color-scheme: light;
+}
+
+@layer base {
+  * {
+    @apply border-onyx-200/60;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-bone text-onyx-800 font-sans antialiased;
+    font-feature-settings: "ss01", "cv01", "cv11";
+  }
+
+  ::selection {
+    background-color: rgb(var(--brand));
+    color: white;
+  }
+
+  h1, h2, h3, h4, h5 {
+    @apply font-display tracking-tightest text-onyx-950;
+    text-wrap: balance;
+  }
+
+  /* Always-visible focus ring for keyboard users */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ember-500 ring-offset-2 ring-offset-bone;
+  }
+
+  /* ── Custom brand scrollbar (Firefox) ── */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--brand)) transparent;
+  }
+
+  /* ── Custom brand scrollbar (WebKit / Chromium) ── */
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgb(var(--ink) / 0.05);
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+    background-color: rgb(var(--brand));
+    transition: background-color 0.2s ease;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--brand-strong));
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@layer components {
+  /* Frosted glass surface */
+  .glass {
+    @apply bg-white/70 backdrop-blur-xl backdrop-saturate-150;
+  }
+  .glass-dark {
+    @apply bg-onyx-950/70 backdrop-blur-xl backdrop-saturate-150;
+  }
+
+  /* Eyebrow / kicker label used above section titles */
+  .kicker {
+    @apply inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-ember-600;
+  }
+
+  /* Thin ember underline accent */
+  .accent-rule::before {
+    content: "";
+    @apply mr-2 inline-block h-px w-8 translate-y-[-3px] bg-ember-500;
+  }
+
+  /* Section vertical rhythm */
+  .section {
+    @apply py-20 sm:py-24 lg:py-32;
+  }
+
+  /* Reusable hairline divider */
+  .hairline {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-onyx-200 to-transparent;
+  }
+
+  /* Brand range slider (used by the shop price filter) */
+  .brand-range {
+    @apply h-1.5 cursor-pointer appearance-none rounded-full bg-onyx-200 accent-ember-500;
+  }
+  .brand-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 9999px;
+    background-color: rgb(var(--brand));
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px -1px rgba(14, 131, 136, 0.55);
+    transition: transform 0.15s ease;
+  }
+  .brand-range::-webkit-slider-thumb:hover {
+    transform: scale(1.12);
+  }
+  .brand-range::-moz-range-thumb {
+    height: 18px;
+    width: 18px;
+    border-radius: 9999px;
+    background-color: rgb(var(--brand));
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px -1px rgba(14, 131, 136, 0.55);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-gradient-ember {
+    @apply bg-ember-grad bg-clip-text text-transparent;
+  }
+  /* Animated brand gradient — a colour-shifting teal flow (jol = water/ink). */
+  .text-ember-flow {
+    background-image: linear-gradient(
+      100deg,
+      #2fb4b6 0%,
+      #0e8388 22%,
+      #0d565a 42%,
+      #19a3a0 60%,
+      #0a6a6f 80%,
+      #2fb4b6 100%
+    );
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: ember-flow 5.5s ease-in-out infinite;
+  }
+  .bg-grid {
+    background-image: theme("backgroundImage.grid-faint");
+    background-size: 44px 44px;
+  }
+  /* Subtle film-grain noise overlay (pure CSS, no raster asset) */
+  .noise::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  }
+  .mask-fade-r {
+    -webkit-mask-image: linear-gradient(to right, black 70%, transparent 100%);
+    mask-image: linear-gradient(to right, black 70%, transparent 100%);
+  }
+  .mask-fade-x {
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+  /* Pause CSS animations on hover (used by marquees) */
+  .pause-on-hover:hover * {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes ember-flow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
