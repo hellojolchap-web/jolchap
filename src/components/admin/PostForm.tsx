@@ -13,6 +13,7 @@ import { createPost, updatePost, deletePost, type PostInput } from "@/app/admin/
 import { estimateReadingTime } from "@/lib/utils";
 import { Field, FormSection, Toggle, fieldInput, fieldArea } from "./FormKit";
 import { ImageUploader } from "./ImageUploader";
+import { RichTextField } from "./RichTextField";
 import { NotConfiguredNotice } from "./AdminUI";
 import { cn } from "@/lib/utils";
 
@@ -274,14 +275,12 @@ export function PostForm({ initial }: { initial?: BlogPost }) {
               />
             </Field>
 
-            <Field label="Content" htmlFor="content" hint="HTML allowed">
-              <textarea
+            <Field label="Content" htmlFor="content" hint="Write normally — no HTML needed">
+              <RichTextField
                 id="content"
                 value={s.content}
-                onChange={(e) => set("content", e.target.value)}
+                onChange={(html) => set("content", html)}
                 rows={16}
-                placeholder="<p>Start writing…</p>"
-                className={cn(fieldArea, "font-mono text-[13px]")}
               />
             </Field>
           </FormSection>

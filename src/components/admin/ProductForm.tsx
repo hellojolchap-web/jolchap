@@ -25,6 +25,7 @@ import {
   fieldArea,
 } from "./FormKit";
 import { ImageUploader } from "./ImageUploader";
+import { RichTextField } from "./RichTextField";
 import { NotConfiguredNotice } from "./AdminUI";
 import { cn } from "@/lib/utils";
 
@@ -327,14 +328,12 @@ export function ProductForm({ initial }: { initial?: Product }) {
               />
             </Field>
 
-            <Field label="Full description" htmlFor="description" hint="HTML allowed">
-              <textarea
+            <Field label="Full description" htmlFor="description" hint="Write normally — no HTML needed">
+              <RichTextField
                 id="description"
                 value={s.description}
-                onChange={(e) => set("description", e.target.value)}
-                rows={8}
-                placeholder="<p>Tell the full story…</p>"
-                className={cn(fieldArea, "font-mono text-[13px]")}
+                onChange={(html) => set("description", html)}
+                rows={9}
               />
             </Field>
           </FormSection>
