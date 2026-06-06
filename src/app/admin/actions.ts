@@ -79,7 +79,7 @@ function productRow(input: ProductInput, id: string) {
     category_name: input.categoryName,
     price: input.price,
     compare_at_price: input.compareAtPrice,
-    currency: input.currency || "USD",
+    currency: input.currency || "BDT",
     badge: input.badge,
     short_description: input.shortDescription,
     description: input.description,

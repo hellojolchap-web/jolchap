@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Inter } from "next/font/google";
+import { Archivo, Inter, Hind_Siliguri } from "next/font/google";
 import { Toaster } from "sonner";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { Header } from "@/components/layout/Header";
@@ -20,6 +20,15 @@ const display = Archivo({
 const sans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+// Bengali support — Latin glyphs come from Inter/Archivo; Bengali (বাংলা)
+// glyphs fall back to Hind Siliguri so Bangla content renders cleanly.
+const bengali = Hind_Siliguri({
+  subsets: ["bengali", "latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-bengali",
   display: "swap",
 });
 
@@ -99,7 +108,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable}`}>
+    <html lang="en" className={`${display.variable} ${sans.variable} ${bengali.variable}`}>
       <body className="min-h-screen bg-bone antialiased">
         <a
           href="#main"

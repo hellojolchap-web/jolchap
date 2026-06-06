@@ -64,8 +64,9 @@ const config: Config = {
         ink: "rgb(var(--ink) / <alpha-value>)",
       },
       fontFamily: {
-        display: ["var(--font-display)", "Archivo", "system-ui", "sans-serif"],
-        sans: ["var(--font-sans)", "Inter", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-bengali)", "Archivo", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "var(--font-bengali)", "Inter", "system-ui", "sans-serif"],
+        bengali: ["var(--font-bengali)", "Hind Siliguri", "system-ui", "sans-serif"],
       },
       letterSpacing: {
         tightest: "-0.045em",
