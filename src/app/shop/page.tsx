@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ShopBrowser } from "@/components/commerce/ShopBrowser";
 import { getCategories, getProducts } from "@/lib/queries";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Shop All Products",
   description:
-    "Everything Jolchap makes in one place — custom seals, printed apparel, photo mugs, tote bags, personalised gifts and wedding stationery, all made to order in Dhaka.",
-  alternates: { canonical: "/shop" },
-};
+    "Browse every Jolchap product — custom seals & stamps, printed apparel, photo mugs, tote bags, personalised gifts and stationery, all made to order in Dhaka.",
+  path: "/shop",
+});
 
 interface ShopPageProps {
   searchParams: Promise<{ q?: string; sort?: string; sale?: string }>;

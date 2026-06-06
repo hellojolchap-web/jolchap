@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/ui/Reveal";
 import { siteConfig } from "@/config/site";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy | Jolchap — Custom Print & Personalisation Studio",
+export const metadata = pageMetadata({
+  title: "Privacy Policy",
   description:
-    "How Jolchap collects, uses and protects your personal data. Covers order processing, bKash/Nagad/card payments, courier data sharing, cookies, and your rights under Bangladesh law.",
-};
+    "How Jolchap collects, uses and protects your data.",
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

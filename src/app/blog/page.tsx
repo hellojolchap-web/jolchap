@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Clock, Mail } from "lucide-react";
@@ -11,20 +10,14 @@ import { Reveal } from "@/components/ui/Reveal";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { Pagination } from "@/components/ui/Pagination";
 import { formatDate, clamp } from "@/lib/utils";
-import { siteConfig } from "@/config/site";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "The Jolchap Journal",
   description:
     "Design tips, gifting inspiration, product guides and behind-the-scenes stories from the Jolchap custom print & personalisation studio in Dhaka.",
-  openGraph: {
-    title: "The Jolchap Journal · Jolchap",
-    description:
-      "Design tips, gifting inspiration, product guides and studio stories from Jolchap.",
-    url: `${siteConfig.url}/blog`,
-    images: [{ url: siteConfig.ogImage, width: 1200, height: 630, alt: "The Jolchap Journal" }],
-  },
-};
+  path: "/blog",
+});
 
 const PAGE_SIZE = 9; // 3 columns × 3 rows
 

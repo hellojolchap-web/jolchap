@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
@@ -7,12 +6,14 @@ import { Container } from "@/components/ui/Container";
 import { MessageCircle } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { whatsappLink } from "@/lib/utils";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Artwork & Size Guide | Jolchap — Custom Print & Personalisation Studio",
+export const metadata = pageMetadata({
+  title: "Artwork & Size Guide",
   description:
-    "How to send artwork for custom printing at Jolchap — file formats, resolution, colour mode, bleed. Plus apparel size chart (S–XXL) and stamp size reference table.",
-};
+    "How to send print-ready artwork, plus apparel and stamp size charts for Jolchap orders.",
+  path: "/size-guide",
+});
 
 function TableWrapper({ children }: { children: React.ReactNode }) {
   return (

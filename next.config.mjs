@@ -10,35 +10,83 @@ try {
   supabaseHost = "";
 }
 
+const securityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "X-DNS-Prefetch-Control", value: "on" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
+  },
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=63072000; includeSubDomains; preload",
+  },
+];
+
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  compress: true,
+  productionBrowserSourceMaps: false,
 
-  // Keep `sharp` (native image library used by the upload route) out of the
-  // bundled serverless function — it runs from node_modules at runtime. This
-  // avoids function-size / native-binary issues on the deploy platform.
+  // Strip console.* (except errors/warnings) from the production bundle.
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
+  },
+
+  // Keep `sharp` out of the bundled serverless function (runs from node_modules).
   serverExternalPackages: ["sharp"],
 
-  // The project type-checks and lints clean locally; we don't want a stray
-  // lint/type edge case on the build platform to block a production deploy.
+  // Ensure the OG card fonts are traced into every opengraph-image function.
+  outputFileTracingIncludes: {
+    "/**": ["./src/lib/og/*.woff"],
+  },
+
+  // Type-checks & lints clean locally; never let a build-platform edge case
+  // block a production deploy.
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
 
   images: {
-    // Standardise the whole project on WebP; the upload pipeline stores WebP.
     formats: ["image/webp"],
+    deviceSizes: [360, 420, 640, 768, 1024, 1280, 1536, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 365,
     remotePatterns: [
-      // Supabase Storage public bucket (derived from your env at build time).
       ...(supabaseHost
         ? [{ protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/**" }]
         : []),
-      // Fallback so any *.supabase.co project works out of the box.
       { protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" },
     ],
   },
 
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
+  },
+
+  async headers() {
+    return [
+      {
+        // Security headers on every route.
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+      {
+        // Long-lived immutable cache for generated/static images.
+        source: "/images/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
+        source: "/fonts/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+    ];
   },
 };
 

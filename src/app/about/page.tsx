@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -8,12 +7,15 @@ import { Container } from "@/components/ui/Container";
 import { Stars } from "@/components/ui/Stars";
 import { getTestimonials } from "@/lib/queries";
 import { siteConfig } from "@/config/site";
+import { pageMetadata, breadcrumbLd } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
 
-export const metadata: Metadata = {
-  title: "Our Story | Jolchap — Custom Print & Personalisation Studio",
+export const metadata = pageMetadata({
+  title: "Our Story",
   description:
-    "Founded in 2019 in Dhaka, Jolchap started with custom stamps and seals and grew into Bangladesh's favourite personalisation studio — printing apparel, mugs, gifts and stationery for individuals, couples, weddings and businesses.",
-};
+    "How Jolchap grew from a small custom-stamp shop into a full print & personalisation studio in Dhaka — and the people we print for.",
+  path: "/about",
+});
 
 const values = [
   {
@@ -111,6 +113,10 @@ export default async function AboutPage() {
 
   return (
     <>
+      <JsonLd data={breadcrumbLd([
+        { name: "Home", path: "/" },
+        { name: "Our Story", path: "/about" },
+      ])} />
       {/* ── Hero ── */}
       <PageHeader
         variant="dark"

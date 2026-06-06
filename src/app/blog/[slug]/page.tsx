@@ -13,6 +13,8 @@ import { BlogCard } from "@/components/blog/BlogCard";
 import { ShareButtons } from "@/components/blog/ShareButtons";
 import { formatDate } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
+import { pageMetadata, blogPostingLd, breadcrumbLd } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
 
 /* ── Static params ────────────────────────────────────────────────── */
 export async function generateStaticParams() {
@@ -30,32 +32,14 @@ export async function generateMetadata({
   const post = await getBlogPost(slug);
   if (!post) return { title: "Article not found" };
 
-  return {
+  return pageMetadata({
     title: post.title,
     description: post.excerpt,
-    openGraph: {
-      title: `${post.title} · Jolchap Journal`,
-      description: post.excerpt,
-      url: `${siteConfig.url}/blog/${post.slug}`,
-      type: "article",
-      publishedTime: post.publishedAt,
-      authors: [post.author.name],
-      images: [
-        {
-          url: post.coverImage,
-          width: 1200,
-          height: 630,
-          alt: post.title,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: post.title,
-      description: post.excerpt,
-      images: [post.coverImage],
-    },
-  };
+    path: `/blog/${post.slug}`,
+    type: "article",
+    publishedTime: post.publishedAt,
+    modifiedTime: post.publishedAt,
+  });
 }
 
 /* ── Page ─────────────────────────────────────────────────────────── */
@@ -73,6 +57,14 @@ export default async function BlogPostPage({
 
   return (
     <>
+      <JsonLd data={[
+        blogPostingLd(post),
+        breadcrumbLd([
+          { name: "Home", path: "/" },
+          { name: "Journal", path: "/blog" },
+          { name: post.title, path: `/blog/${post.slug}` },
+        ]),
+      ]} />
       {/* ── Article header ──────────────────────────────────────────── */}
       <header className="relative overflow-hidden border-b border-onyx-100 bg-bone pb-0 pt-10 sm:pt-12">
         <div className="pointer-events-none absolute inset-0 bg-grid opacity-40" />

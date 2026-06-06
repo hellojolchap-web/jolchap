@@ -19,13 +19,15 @@ import {
   getBlogPosts,
   getTestimonials,
 } from "@/lib/queries";
-import { siteConfig } from "@/config/site";
 import type { Product } from "@/types";
+import { pageMetadata, organizationLd, websiteLd, localBusinessLd } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   description:
     "Jolchap — a Dhaka-based custom print & personalisation studio. Design custom seals & stamps, printed t-shirts, photo mugs, tote bags, personalised gifts and wedding stationery. Free design preview before you pay and fast delivery across Bangladesh.",
-};
+  path: "/",
+});
 
 /** De-duplicate a list of products by id, preserving first-seen order. */
 function dedupe(products: Product[]): Product[] {
@@ -64,6 +66,8 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={[organizationLd(), websiteLd(), localBusinessLd()]} />
+
       {heroProduct && <Hero product={heroProduct} />}
 
       <BrandStrip />

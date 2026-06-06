@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { MapPin, Phone, Mail, Clock, MessageCircle, Instagram, Youtube, Facebook } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -8,12 +7,15 @@ import { Container } from "@/components/ui/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { siteConfig } from "@/config/site";
 import { whatsappLink } from "@/lib/utils";
+import { pageMetadata, breadcrumbLd } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
 
-export const metadata: Metadata = {
-  title: "Contact Us | Jolchap — Custom Print & Personalisation Studio",
+export const metadata = pageMetadata({
+  title: "Contact Us",
   description:
-    "Get in touch with the Jolchap team for custom order quotes, corporate & bulk enquiries, order tracking, or general help. We reply within one business day.",
-};
+    "Get a free design preview, ask about bulk orders, or track your order. Reach the Jolchap team on WhatsApp, phone or email.",
+  path: "/contact",
+});
 
 const { contact, socials } = siteConfig;
 
@@ -28,6 +30,10 @@ export default function ContactPage() {
 
   return (
     <>
+      <JsonLd data={breadcrumbLd([
+        { name: "Home", path: "/" },
+        { name: "Contact", path: "/contact" },
+      ])} />
       <PageHeader
         kicker="Get in touch"
         title="We're here to help"

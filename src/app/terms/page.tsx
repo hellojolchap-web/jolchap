@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/ui/Reveal";
 import { siteConfig } from "@/config/site";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Terms of Service | Jolchap — Custom Print & Personalisation Studio",
+export const metadata = pageMetadata({
+  title: "Terms of Service",
   description:
-    "Terms governing your use of the Jolchap website and purchase of custom-printed products — ordering, custom artwork IP, pricing in BDT, payments, delivery, and returns.",
-};
+    "The terms governing orders, custom artwork and use of the Jolchap store.",
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

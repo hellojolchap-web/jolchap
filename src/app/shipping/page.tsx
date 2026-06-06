@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
 import { siteConfig } from "@/config/site";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Delivery & Shipping Policy | Jolchap — Custom Print & Personalisation Studio",
+export const metadata = pageMetadata({
+  title: "Shipping & Delivery",
   description:
-    "Jolchap delivery rates for Dhaka and nationwide Bangladesh, production turnaround times, courier partners (Pathao, Sundarban, RedX), cash on delivery, and order tracking.",
-};
+    "Jolchap delivery times, charges and courier partners across Bangladesh.",
+  path: "/shipping",
+});
 
 export default function ShippingPage() {
   return (

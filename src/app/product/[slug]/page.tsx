@@ -15,6 +15,8 @@ import {
   getRelatedProducts,
 } from "@/lib/queries";
 import { siteConfig } from "@/config/site";
+import { pageMetadata, breadcrumbLd } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -32,28 +34,11 @@ export async function generateMetadata({
   const product = await getProduct(slug);
   if (!product) return { title: "Product not found" };
 
-  const title = product.name;
-  const description = product.shortDescription;
-  const image = product.images[0];
-
-  return {
-    title,
-    description,
-    alternates: { canonical: `/product/${product.slug}` },
-    openGraph: {
-      type: "website",
-      title: `${title} · ${siteConfig.name}`,
-      description,
-      url: `${siteConfig.url}/product/${product.slug}`,
-      images: image ? [{ url: image, alt: product.name }] : undefined,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: image ? [image] : undefined,
-    },
-  };
+  return pageMetadata({
+    title: product.name,
+    description: product.shortDescription,
+    path: `/product/${product.slug}`,
+  });
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
@@ -94,6 +79,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <JsonLd data={breadcrumbLd([
+        { name: "Home", path: "/" },
+        { name: "Shop", path: "/shop" },
+        { name: product.categoryName, path: `/category/${product.categorySlug}` },
+        { name: product.name, path: `/product/${product.slug}` },
+      ])} />
 
       <Container className="py-7">
         <Breadcrumbs

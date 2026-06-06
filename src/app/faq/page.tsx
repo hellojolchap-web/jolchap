@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
@@ -8,12 +7,15 @@ import { Accordion, type AccordionItem } from "@/components/ui/Accordion";
 import { MessageCircle } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { whatsappLink } from "@/lib/utils";
+import { pageMetadata, faqLd } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
 
-export const metadata: Metadata = {
-  title: "Frequently Asked Questions | Jolchap — Custom Print & Personalisation Studio",
+export const metadata = pageMetadata({
+  title: "FAQ",
   description:
-    "Answers to common questions about ordering from Jolchap — artwork, printing methods, delivery across Bangladesh, returns, and corporate bulk orders.",
-};
+    "Answers to common questions about ordering, customisation, printing, delivery and returns at Jolchap.",
+  path: "/faq",
+});
 
 interface FaqGroup {
   heading: string;
@@ -331,6 +333,28 @@ const faqGroups: FaqGroup[] = [
   },
 ];
 
+const FAQ_ITEMS = [
+  { q: "How do I send my artwork or design?", a: "You can share your artwork by uploading it during checkout, sending it via WhatsApp, or emailing it with your order number. If you don't have a design, our in-house design team will create a draft for you to review before production begins." },
+  { q: "Do I get a preview of my design before you print it?", a: "Yes — always. We send a free digital preview before we start production. You can request changes at no extra cost. We only begin printing once you have given your written approval." },
+  { q: "Is there a minimum order quantity?", a: "Most products have no minimum — you can order a single item. Some products such as screen-printed t-shirts have a minimum of 10–25 pieces due to setup cost. For bulk orders of 25+ pieces, contact us for a volume quote." },
+  { q: "What file formats do you accept?", a: "Best: PDF, AI, EPS, or SVG vector files. Accepted: PNG with transparent background at 300 DPI or higher. For photo products: high-resolution JPG or PNG at 300 DPI minimum. We do not accept BMP, GIF or low-resolution images." },
+  { q: "Can I make changes after I've placed an order?", a: "Changes can be made before you approve the design preview. Once you have approved and production has started, changes are not possible. Contact us immediately via WhatsApp if you spot an error after approving." },
+  { q: "What printing methods do you use?", a: "Laser engraving for stamps and wooden items; sublimation heat-press for mugs and polyester apparel; DTF transfer for cotton t-shirts and tote bags; screen printing for high-volume apparel; digital offset for stationery and business cards." },
+  { q: "How durable is the print on t-shirts?", a: "Our DTF prints resist peeling and cracking for 40–50+ washes when cared for correctly: wash inside-out in cold water, avoid high-heat tumble drying, and do not iron directly on the print." },
+  { q: "Can I use my own photos on mugs or apparel?", a: "Yes — photo personalisation is one of our most popular services. For best results send a photo at least 1 MB in size and well-lit. Our design team will review and flag any quality concerns before approving the mockup." },
+  { q: "Will the printed colours exactly match my screen?", a: "Screens display RGB and printers work in CMYK, so there is always a small difference. Colours may print slightly more muted. If colour accuracy is critical, mention it when placing your order." },
+  { q: "Do you deliver outside Dhaka?", a: "Yes — we deliver nationwide across Bangladesh via Pathao, Sundarban Courier, and RedX. Dhaka deliveries arrive within 1–2 working days of dispatch. Outside Dhaka takes 2–5 working days depending on location." },
+  { q: "How long does production take before my order ships?", a: "After design approval: stamps and seals 1–2 days; mugs and small gifts 1–2 days; t-shirts (1–10 pieces) 2–3 days; bulk apparel (10+) 3–5 days; stationery and business cards 2–4 days. Peak seasons may add 1–2 days." },
+  { q: "What are the delivery charges?", a: "Dhaka city: ৳60–৳80. Outside Dhaka: ৳120–৳150 for standard parcels. Exact charges are calculated at checkout based on your location and parcel weight." },
+  { q: "Do you offer cash on delivery (COD)?", a: "Yes — we offer cash on delivery across Bangladesh. Orders under ৳1,000 are fully COD. Orders of ৳1,000–৳5,000 require a 50% advance. Orders over ৳5,000 require full prepayment." },
+  { q: "Can I return a personalised item?", a: "Because every order is made to order, we cannot accept returns for change of mind. We do offer free reprints or refunds for printing errors and manufacturing defects." },
+  { q: "What if there is a printing error or defect on my order?", a: "If your order arrives with a printing error or manufacturing defect, we will reprint or refund it at no cost. Photograph the issue and contact us within 48 hours of receiving your order." },
+  { q: "What if my order was damaged during delivery?", a: "Photograph the packaging and contents before unpacking. Contact us within 48 hours with photos. We will file a claim with the courier and send a replacement at no extra charge." },
+  { q: "How do I place a bulk or corporate order?", a: "For orders of 25+ pieces or corporate invoicing, contact our corporate team via email or WhatsApp with your product type, quantity, design brief, and delivery deadline. We'll send a quote within one working day." },
+  { q: "Can you add our company logo to products?", a: "Yes — branded merchandise is one of our specialities. We can print your logo on t-shirts, tote bags, mugs, notebooks, rubber stamps and more. Supply your logo as a vector file for the sharpest result." },
+  { q: "Do you issue official invoices for corporate orders?", a: "Yes. We issue official VAT invoices for all corporate and bulk orders. Please mention your company name, BIN if applicable, and billing address when placing your enquiry." },
+];
+
 export default function FaqPage() {
   const waHref = whatsappLink(
     siteConfig.contact.whatsapp,
@@ -339,6 +363,7 @@ export default function FaqPage() {
 
   return (
     <>
+      <JsonLd data={faqLd(FAQ_ITEMS)} />
       <PageHeader
         kicker="Help centre"
         title="Frequently asked questions"

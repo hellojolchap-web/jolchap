@@ -34,7 +34,7 @@ export function SiteShell({
     <>
       {announcement}
       {header}
-      <main>{children}</main>
+      <main id="main">{children}</main>
       {footer}
       {widgets}
       {cart}

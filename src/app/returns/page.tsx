@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
 import { siteConfig } from "@/config/site";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Returns & Refund Policy | Jolchap — Custom Print & Personalisation Studio",
+export const metadata = pageMetadata({
+  title: "Returns & Refunds",
   description:
-    "Jolchap returns and refund policy for personalised, custom-made and made-to-order products. Free reprints or full refunds for printing errors and defects.",
-};
+    "Jolchap's returns and refund policy for made-to-order, personalised products.",
+  path: "/returns",
+});
 
 export default function ReturnsPage() {
   return (

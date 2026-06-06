@@ -13,7 +13,8 @@ import {
   getProductsByCategory,
 } from "@/lib/queries";
 import { cn, deslugify } from "@/lib/utils";
-import { siteConfig } from "@/config/site";
+import { pageMetadata, breadcrumbLd } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
@@ -32,17 +33,11 @@ export async function generateMetadata({
   const category = await getCategory(slug);
   if (!category) return { title: "Category not found" };
 
-  return {
+  return pageMetadata({
     title: category.name,
     description: category.description,
-    alternates: { canonical: `/category/${category.slug}` },
-    openGraph: {
-      title: `${category.name} · ${siteConfig.name}`,
-      description: category.description,
-      url: `${siteConfig.url}/category/${category.slug}`,
-      images: category.image ? [{ url: category.image, alt: category.name }] : undefined,
-    },
-  };
+    path: `/category/${category.slug}`,
+  });
 }
 
 export default async function CategoryPage({
@@ -83,6 +78,11 @@ export default async function CategoryPage({
 
   return (
     <>
+      <JsonLd data={breadcrumbLd([
+        { name: "Home", path: "/" },
+        { name: "Shop", path: "/shop" },
+        { name: category.name, path: `/category/${category.slug}` },
+      ])} />
       <PageHeader
         variant="dark"
         kicker={category.tagline}
