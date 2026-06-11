@@ -92,8 +92,8 @@ export function Header() {
               <Search className="h-[19px] w-[19px]" />
             </button>
             <Link
-              href="/admin"
-              aria-label="Account"
+              href="/account"
+              aria-label="Your account"
               className="hidden h-10 w-10 place-items-center rounded-full text-onyx-900 transition-colors hover:bg-onyx-100 sm:grid"
             >
               <User className="h-[19px] w-[19px]" />

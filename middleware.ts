@@ -4,6 +4,16 @@ import { NextResponse, type NextRequest } from "next/server";
 /** Shape of the cookie array Supabase hands to `setAll`. */
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
+/** Optional admin allowlist — only these emails may reach /admin. */
+const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+  .split(",")
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
+/** Allowlist empty ⇒ any signed-in user is treated as the admin. */
+const isAdmin = (email: string) =>
+  adminEmails.length === 0 || adminEmails.includes(email);
+
 /**
  * Refreshes the Supabase auth session on every admin request and gates access.
  *
@@ -54,11 +64,13 @@ export async function middleware(request: NextRequest) {
 
   // IMPORTANT: getUser() revalidates the token with Supabase (getSession() does not).
   let isAuthenticated = false;
+  let userEmail = "";
   try {
     const {
       data: { user },
     } = await supabase.auth.getUser();
     isAuthenticated = Boolean(user);
+    userEmail = user?.email?.toLowerCase() ?? "";
   } catch {
     isAuthenticated = false;
   }
@@ -67,7 +79,7 @@ export async function middleware(request: NextRequest) {
   if (isLoginRoute) {
     if (isAuthenticated) {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = "/admin";
+      redirectUrl.pathname = isAdmin(userEmail) ? "/admin" : "/account";
       redirectUrl.search = "";
       return NextResponse.redirect(redirectUrl);
     }
@@ -78,6 +90,15 @@ export async function middleware(request: NextRequest) {
   if (!isAuthenticated) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/admin/login";
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // Restrict the admin to the owner(s); a signed-in customer who isn't on the
+  // allowlist is sent to their own account page instead.
+  if (!isAdmin(userEmail)) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/account";
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }

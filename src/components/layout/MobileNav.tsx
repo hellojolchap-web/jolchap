@@ -110,9 +110,12 @@ export function MobileNav({
               })}
             </nav>
 
-            <div className="space-y-4 border-t border-onyx-100 px-5 py-5">
+            <div className="space-y-3 border-t border-onyx-100 px-5 py-5">
               <Button href="/shop" className="w-full" onClick={onClose}>
-                Shop All Gear
+                Shop all products
+              </Button>
+              <Button href="/account" variant="outline" className="w-full" onClick={onClose}>
+                Sign in / Account
               </Button>
               <div className="flex flex-col gap-2 text-sm text-onyx-500">
                 <a
