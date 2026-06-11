@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { ForgeMark } from "@/components/brand/Logo";
+import { JolchapMark } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { createClient } from "@/lib/supabase/client";
@@ -119,7 +119,7 @@ export function AccountClient() {
     return (
       <Shell>
         <div className="text-center">
-          <ForgeMark className="mx-auto h-14 w-14" />
+          <JolchapMark className="mx-auto h-14 w-14" />
           <h1 className="mt-6 text-2xl font-extrabold uppercase tracking-tightest text-onyx-950">
             Accounts coming soon
           </h1>
@@ -207,7 +207,7 @@ export function AccountClient() {
   return (
     <Shell>
       <div className="mb-7 text-center">
-        <ForgeMark className="mx-auto h-12 w-12" />
+        <JolchapMark className="mx-auto h-12 w-12" />
         <h1 className="mt-5 text-2xl font-extrabold uppercase tracking-tightest text-onyx-950">
           {mode === "signin" ? "Welcome back" : "Create your account"}
         </h1>
