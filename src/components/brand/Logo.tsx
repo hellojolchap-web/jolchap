@@ -136,7 +136,7 @@ export function Logo({
         <img
           src={logoUrl}
           alt={name}
-          className={cn("h-9 w-auto max-w-[180px] object-contain", markClassName)}
+          className={cn("h-12 w-auto max-w-[220px] object-contain", markClassName)}
         />
       </span>
     );

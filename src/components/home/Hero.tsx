@@ -1,15 +1,20 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, ShieldCheck, Star, Truck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { formatPrice } from "@/lib/utils";
+import { useSettings } from "@/components/providers/SettingsProvider";
+import { formatPrice, cn } from "@/lib/utils";
 import type { Product } from "@/types";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export function Hero({ product }: { product: Product }) {
+  const { hero, brand } = useSettings();
+  const hasBanners = hero.images.length > 0;
+
   return (
     <section className="relative overflow-hidden bg-bone">
       {/* background flourishes */}
@@ -47,9 +52,7 @@ export function Hero({ product }: { product: Product }) {
             transition={{ duration: 0.6, delay: 0.12, ease }}
             className="mt-6 max-w-md text-lg leading-relaxed text-onyx-600"
           >
-            Custom seals &amp; stamps, printed apparel, photo mugs, tote bags and
-            personalised gifts — designed with you and made to order, right here in
-            Dhaka.
+            {brand.shortDescription}
           </motion.p>
 
           <motion.div
@@ -90,61 +93,25 @@ export function Hero({ product }: { product: Product }) {
           </motion.div>
         </div>
 
-        {/* visual */}
+        {/* visual — custom banner slideshow if set, else the product showcase */}
         <motion.div
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease }}
           className="relative mx-auto w-full max-w-md lg:max-w-none"
         >
-          <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-onyx-950 shadow-elevated">
-            <Image
-              src={product.images[0]}
-              alt={product.name}
-              fill
-              priority
-              sizes="(max-width:1024px) 90vw, 45vw"
-              className="object-cover opacity-90"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-onyx-950/70 via-transparent to-transparent" />
-
-            {/* rotating seal */}
-            <div className="absolute right-5 top-5 grid h-20 w-20 place-items-center">
-              <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full animate-spin-slow text-white/80">
-                <defs>
-                  <path id="seal" d="M50,50 m-37,0 a37,37 0 1,1 74,0 a37,37 0 1,1 -74,0" />
-                </defs>
-                <text className="fill-current text-[10.5px] font-semibold uppercase tracking-[0.18em]">
-                  <textPath href="#seal" startOffset="0%">
-                    Jolchap • Make It Yours • Jolchap • Custom •
-                  </textPath>
-                </text>
-              </svg>
-              <span className="h-2 w-2 rounded-full bg-ember-500" />
-            </div>
-
-            {/* product chip */}
-            <div className="absolute inset-x-5 bottom-5 flex items-center justify-between rounded-2xl bg-white/90 p-4 backdrop-blur">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-ember-600">
-                  {product.badge ?? "Featured"}
-                </p>
-                <p className="mt-0.5 text-sm font-bold leading-tight text-onyx-950">
-                  {product.name}
-                </p>
-              </div>
-              <span className="rounded-full bg-onyx-950 px-3 py-1.5 text-sm font-extrabold text-white">
-                {formatPrice(product.price, product.currency)}
-              </span>
-            </div>
-          </div>
+          {hasBanners ? (
+            <BannerSlideshow images={hero.images} float={hero.float} autoplay={hero.autoplay} />
+          ) : (
+            <ProductShowcase product={product} float={hero.float} />
+          )}
 
           {/* floating stat */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.4, ease }}
-            className="absolute -left-4 top-10 hidden rounded-2xl border border-onyx-100 bg-white p-4 shadow-card sm:block"
+            className="absolute -left-4 top-10 z-10 hidden rounded-2xl border border-onyx-100 bg-white p-4 shadow-card sm:block"
           >
             <p className="text-2xl font-extrabold text-onyx-950">50k+</p>
             <p className="text-xs text-onyx-500">Custom items printed</p>
@@ -152,5 +119,112 @@ export function Hero({ product }: { product: Product }) {
         </motion.div>
       </div>
     </section>
+  );
+}
+
+/* Settings-driven banner slideshow with optional auto-play + float. */
+function BannerSlideshow({
+  images,
+  float,
+  autoplay,
+}: {
+  images: string[];
+  float: boolean;
+  autoplay: boolean;
+}) {
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    if (!autoplay || images.length < 2) return;
+    const t = setInterval(() => setIdx((i) => (i + 1) % images.length), 5000);
+    return () => clearInterval(t);
+  }, [autoplay, images.length]);
+
+  return (
+    <div
+      className={cn(
+        "relative aspect-[4/3] overflow-hidden rounded-[2rem] bg-onyx-950 shadow-elevated",
+        float && "animate-float"
+      )}
+    >
+      {images.map((src, i) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={`${src}-${i}`}
+          src={src}
+          alt=""
+          className={cn(
+            "absolute inset-0 h-full w-full object-cover transition-opacity duration-700",
+            i === idx ? "opacity-100" : "opacity-0"
+          )}
+        />
+      ))}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-onyx-950/30 via-transparent to-transparent" />
+
+      {images.length > 1 && (
+        <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              aria-label={`Show slide ${i + 1}`}
+              className={cn(
+                "h-2 rounded-full bg-white transition-all",
+                i === idx ? "w-6 opacity-100" : "w-2 opacity-50 hover:opacity-80"
+              )}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* Default visual — the featured product card. */
+function ProductShowcase({ product, float }: { product: Product; float: boolean }) {
+  return (
+    <div className={cn("relative", float && "animate-float")}>
+      <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-onyx-950 shadow-elevated">
+        <Image
+          src={product.images[0]}
+          alt={product.name}
+          fill
+          priority
+          sizes="(max-width:1024px) 90vw, 45vw"
+          className="object-cover opacity-90"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-onyx-950/70 via-transparent to-transparent" />
+
+        {/* rotating seal */}
+        <div className="absolute right-5 top-5 grid h-20 w-20 place-items-center">
+          <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full animate-spin-slow text-white/80">
+            <defs>
+              <path id="seal" d="M50,50 m-37,0 a37,37 0 1,1 74,0 a37,37 0 1,1 -74,0" />
+            </defs>
+            <text className="fill-current text-[10.5px] font-semibold uppercase tracking-[0.18em]">
+              <textPath href="#seal" startOffset="0%">
+                Jolchap • Make It Yours • Jolchap • Custom •
+              </textPath>
+            </text>
+          </svg>
+          <span className="h-2 w-2 rounded-full bg-ember-500" />
+        </div>
+
+        {/* product chip */}
+        <div className="absolute inset-x-5 bottom-5 flex items-center justify-between rounded-2xl bg-white/90 p-4 backdrop-blur">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-ember-600">
+              {product.badge ?? "Featured"}
+            </p>
+            <p className="mt-0.5 text-sm font-bold leading-tight text-onyx-950">
+              {product.name}
+            </p>
+          </div>
+          <span className="rounded-full bg-onyx-950 px-3 py-1.5 text-sm font-extrabold text-white">
+            {formatPrice(product.price, product.currency)}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }

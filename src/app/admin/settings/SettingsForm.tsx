@@ -9,7 +9,7 @@ import { updateSettings } from "@/app/admin/actions";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { deriveAccentScale, DEFAULT_ACCENT, ACCENT_STEPS } from "@/lib/theme";
 import type { ResolvedSettings } from "@/lib/settings";
-import { Field, FormSection, fieldInput, fieldArea } from "@/components/admin/FormKit";
+import { Field, FormSection, Toggle, fieldInput, fieldArea } from "@/components/admin/FormKit";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { NotConfiguredNotice } from "@/components/admin/AdminUI";
 import { cn } from "@/lib/utils";
@@ -53,6 +53,8 @@ export function SettingsForm({ initial }: { initial: ResolvedSettings }) {
     setS((p) => ({ ...p, contact: { ...p.contact, address: { ...p.contact.address, [k]: v } } }));
   const setSocial = <K extends keyof ResolvedSettings["socials"]>(k: K, v: string) =>
     setS((p) => ({ ...p, socials: { ...p.socials, [k]: v } }));
+  const setHero = <K extends keyof ResolvedSettings["hero"]>(k: K, v: ResolvedSettings["hero"][K]) =>
+    setS((p) => ({ ...p, hero: { ...p.hero, [k]: v } }));
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -229,6 +231,28 @@ export function SettingsForm({ initial }: { initial: ResolvedSettings }) {
           </Field>
         </FormSection>
       </div>
+
+      {/* Hero banner — full width */}
+      <FormSection
+        title="Hero banner"
+        description="Upload banner image(s) for the homepage hero. Add more than one for an auto-playing slideshow. Leave empty to keep the default product showcase."
+      >
+        <ImageUploader multiple value={s.hero.images} onChange={(urls) => setHero("images", urls)} label="Banner images" />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Toggle
+            checked={s.hero.float}
+            onChange={(v) => setHero("float", v)}
+            label="Floating effect"
+            description="Gentle up-and-down motion"
+          />
+          <Toggle
+            checked={s.hero.autoplay}
+            onChange={(v) => setHero("autoplay", v)}
+            label="Auto-play slideshow"
+            description="Advance images automatically"
+          />
+        </div>
+      </FormSection>
     </form>
   );
 }
