@@ -111,7 +111,15 @@ export async function createProduct(input: ProductInput): Promise<ActionResult> 
   try {
     const admin = createAdminClient();
     const { error } = await admin.from("products").insert(productRow(input, id));
-    if (error) return { ok: false, error: error.message };
+    if (error) {
+      if (error.code === "23505") {
+        return {
+          ok: false,
+          error: `A product with the URL slug "${input.slug}" already exists. Open it from the Products list to edit it, or choose a different slug.`,
+        };
+      }
+      return { ok: false, error: error.message };
+    }
     revalidateProductRoutes(input.slug);
     return { ok: true, id };
   } catch (err) {
@@ -184,7 +192,15 @@ export async function createPost(input: PostInput): Promise<ActionResult> {
   try {
     const admin = createAdminClient();
     const { error } = await admin.from("blog_posts").insert(postRow(input, id));
-    if (error) return { ok: false, error: error.message };
+    if (error) {
+      if (error.code === "23505") {
+        return {
+          ok: false,
+          error: `A post with the URL slug "${input.slug}" already exists. Open it from the Blog list to edit it, or choose a different slug.`,
+        };
+      }
+      return { ok: false, error: error.message };
+    }
     revalidatePostRoutes(input.slug);
     return { ok: true, id };
   } catch (err) {
