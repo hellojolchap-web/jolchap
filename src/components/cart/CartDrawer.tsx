@@ -3,19 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { Minus, Plus, ShoppingBag, Trash2, X, Truck } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useCart, lineKey, cartSubtotal } from "@/lib/store/cart";
-import { formatPrice, clamp } from "@/lib/utils";
-
-const FREE_SHIPPING_THRESHOLD = 99;
+import { formatPrice } from "@/lib/utils";
 
 export function CartDrawer() {
   const { items, isOpen, close, remove, setQty } = useCart();
   const subtotal = cartSubtotal(items);
-  const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
-  const progress = clamp((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 0, 100);
-  const currency = items[0]?.currency ?? "USD";
+  const currency = items[0]?.currency ?? "BDT";
 
   return (
     <AnimatePresence>
@@ -52,28 +48,6 @@ export function CartDrawer() {
                 <X className="h-5 w-5" />
               </button>
             </header>
-
-            {/* free shipping bar */}
-            {items.length > 0 && (
-              <div className="border-b border-onyx-100 bg-white px-5 py-3">
-                <p className="mb-2 flex items-center gap-2 text-xs font-medium text-onyx-600">
-                  <Truck className="h-4 w-4 text-ember-500" />
-                  {remaining > 0 ? (
-                    <>
-                      Add <strong className="text-onyx-950">{formatPrice(remaining, currency)}</strong> for free shipping
-                    </>
-                  ) : (
-                    <strong className="text-ember-600">You&apos;ve unlocked free shipping! 🎉</strong>
-                  )}
-                </p>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-onyx-100">
-                  <div
-                    className="h-full rounded-full bg-ember-grad transition-all duration-500"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
-            )}
 
             <div className="flex-1 overflow-y-auto px-5 py-4">
               {items.length === 0 ? (

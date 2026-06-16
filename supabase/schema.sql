@@ -65,6 +65,7 @@ create table if not exists public.products (
   sizes             jsonb not null default '[]'::jsonb,
   in_stock          boolean not null default true,
   stock_count       integer not null default 0,
+  delivery_charge   numeric(10, 2) not null default 0,
   is_featured       boolean not null default false,
   is_new            boolean not null default false,
   is_bestseller     boolean not null default false,

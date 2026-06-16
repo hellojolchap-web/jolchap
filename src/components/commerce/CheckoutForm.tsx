@@ -13,7 +13,9 @@ import {
   User,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useCart, cartSubtotal } from "@/lib/store/cart";
+import { useCart, cartSubtotal, cartDelivery } from "@/lib/store/cart";
+import { useSettings } from "@/components/providers/SettingsProvider";
+import { findPromo } from "@/lib/settings";
 import { cn, formatPrice } from "@/lib/utils";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -45,7 +47,7 @@ const EMPTY: Fields = {
   city: "",
   region: "",
   postcode: "",
-  country: "United States",
+  country: "Bangladesh",
   card: "",
   exp: "",
   cvc: "",
@@ -53,24 +55,22 @@ const EMPTY: Fields = {
 
 type Errors = Partial<Record<keyof Fields, string>>;
 
-const FREE_SHIPPING_THRESHOLD = 99;
-const SHIPPING_FLAT = 9.99;
-const TAX_RATE = 0.08;
-
 export function CheckoutForm() {
-  const { items, clear } = useCart();
+  const { items, clear, promoCode } = useCart();
+  const { promos } = useSettings();
   const subtotal = cartSubtotal(items);
-  const currency = items[0]?.currency ?? "USD";
+  const currency = items[0]?.currency ?? "BDT";
 
-  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_FLAT;
-  const tax = subtotal * TAX_RATE;
-  const total = subtotal + shipping + tax;
+  const delivery = cartDelivery(items);
+  const appliedPromo = findPromo(promoCode, promos);
+  const discount = appliedPromo ? Math.min(appliedPromo.discount, subtotal) : 0;
+  const total = Math.max(0, subtotal + delivery - discount);
 
   const [values, setValues] = useState<Fields>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<"idle" | "processing" | "done">("idle");
   const [orderNo] = useState(
-    () => `FRG-${Math.floor(100000 + Math.random() * 900000)}`
+    () => `JC-${Math.floor(100000 + Math.random() * 900000)}`
   );
 
   const set =
@@ -533,6 +533,8 @@ function formatExp(v: string) {
 }
 
 const COUNTRIES = [
+  "Bangladesh",
+  "India",
   "United States",
   "Canada",
   "United Kingdom",

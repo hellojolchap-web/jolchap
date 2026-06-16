@@ -52,6 +52,7 @@ interface State {
   tags: string;
   images: string[];
   stockCount: string;
+  deliveryCharge: string;
   inStock: boolean;
   isFeatured: boolean;
   isNew: boolean;
@@ -82,6 +83,7 @@ function initialState(initial: Product | undefined, defaultCatSlug: string): Sta
     tags: initial?.tags.join(", ") ?? "",
     images: initial?.images ?? [],
     stockCount: initial ? String(initial.stockCount) : "0",
+    deliveryCharge: initial?.deliveryCharge != null ? String(initial.deliveryCharge) : "0",
     inStock: initial?.inStock ?? true,
     isFeatured: initial?.isFeatured ?? false,
     isNew: initial?.isNew ?? false,
@@ -158,6 +160,7 @@ export function ProductForm({
       tags: commaToArray(s.tags),
       images: s.images,
       stockCount: Number(s.stockCount) || 0,
+      deliveryCharge: Number(s.deliveryCharge) || 0,
       inStock: s.inStock,
       isFeatured: s.isFeatured,
       isNew: s.isNew,
@@ -406,16 +409,28 @@ export function ProductForm({
                 />
               </Field>
             </div>
-            <Field label="Currency" htmlFor="currency">
-              <input
-                id="currency"
-                value={s.currency}
-                onChange={(e) => set("currency", e.target.value.toUpperCase())}
-                placeholder="USD"
-                maxLength={3}
-                className={cn(fieldInput, "uppercase")}
-              />
-            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Currency" htmlFor="currency">
+                <input
+                  id="currency"
+                  value={s.currency}
+                  onChange={(e) => set("currency", e.target.value.toUpperCase())}
+                  placeholder="BDT"
+                  maxLength={3}
+                  className={cn(fieldInput, "uppercase")}
+                />
+              </Field>
+              <Field label="Delivery charge" htmlFor="delivery" hint="0 = free">
+                <input
+                  id="delivery"
+                  inputMode="decimal"
+                  value={s.deliveryCharge}
+                  onChange={(e) => set("deliveryCharge", e.target.value)}
+                  placeholder="0"
+                  className={fieldInput}
+                />
+              </Field>
+            </div>
           </FormSection>
 
           <FormSection title="Inventory">

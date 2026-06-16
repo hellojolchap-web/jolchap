@@ -19,34 +19,41 @@ import { toast } from "sonner";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Container } from "@/components/ui/Container";
 import { CheckoutForm } from "@/components/commerce/CheckoutForm";
-import { useCart, lineKey, cartSubtotal, cartCount } from "@/lib/store/cart";
+import { useCart, lineKey, cartSubtotal, cartCount, cartDelivery } from "@/lib/store/cart";
+import { useSettings } from "@/components/providers/SettingsProvider";
+import { findPromo } from "@/lib/settings";
 import { cn, formatPrice } from "@/lib/utils";
 
-const FREE_SHIPPING_THRESHOLD = 99;
-const SHIPPING_FLAT = 9.99;
-const TAX_RATE = 0.08;
-
 export default function CartClient() {
-  const { items, remove, setQty } = useCart();
+  const { items, remove, setQty, promoCode, setPromoCode } = useCart();
+  const { promos } = useSettings();
   const subtotal = cartSubtotal(items);
   const count = cartCount(items);
-  const currency = items[0]?.currency ?? "USD";
+  const currency = items[0]?.currency ?? "BDT";
 
-  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_FLAT;
-  const tax = subtotal * TAX_RATE;
-  const total = subtotal + shipping + tax;
-  const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
-  const progress = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
+  const delivery = cartDelivery(items);
+  const appliedPromo = findPromo(promoCode, promos);
+  const discount = appliedPromo ? Math.min(appliedPromo.discount, subtotal) : 0;
+  const total = Math.max(0, subtotal + delivery - discount);
 
-  const [promo, setPromo] = useState("");
-  const [promoMsg, setPromoMsg] = useState<string | null>(null);
+  const [promo, setPromo] = useState(promoCode);
 
   const applyPromo = () => {
-    if (!promo.trim()) return;
-    setPromoMsg("Promo codes are applied at our demo checkout — your total stands.");
-    toast.message("Code noted", {
-      description: `“${promo.trim().toUpperCase()}” will be reviewed at checkout.`,
-    });
+    const code = promo.trim();
+    if (!code) return;
+    const match = findPromo(code, promos);
+    if (!match) {
+      setPromoCode("");
+      toast.error("That promo code isn't valid.");
+      return;
+    }
+    setPromoCode(match.code);
+    toast.success(`Code applied — ${formatPrice(match.discount, currency)} off!`);
+  };
+
+  const clearPromo = () => {
+    setPromo("");
+    setPromoCode("");
   };
 
   /* ── Empty state ── */
@@ -86,7 +93,7 @@ export default function CartClient() {
           </Link>
 
           <div className="mt-14 grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-3">
-            <PerkCard icon={<Truck className="h-5 w-5" />} title="Free shipping" copy="On orders over $99" />
+            <PerkCard icon={<Truck className="h-5 w-5" />} title="Fast delivery" copy="Across Bangladesh" />
             <PerkCard icon={<RotateCcw className="h-5 w-5" />} title="30-day returns" copy="No-sweat exchanges" />
             <PerkCard icon={<ShieldCheck className="h-5 w-5" />} title="Lifetime guarantee" copy="On every build" />
           </div>
@@ -121,34 +128,6 @@ export default function CartClient() {
         <div className="grid gap-10 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_420px]">
           {/* ── Left: line items + checkout ── */}
           <div className="min-w-0">
-            {/* free shipping meter */}
-            <div className="mb-6 rounded-2xl border border-onyx-100 bg-white p-4">
-              <p className="mb-2 flex items-center gap-2 text-sm text-onyx-600">
-                <Truck className="h-4 w-4 text-ember-500" />
-                {remaining > 0 ? (
-                  <>
-                    You&apos;re{" "}
-                    <strong className="text-onyx-950">
-                      {formatPrice(remaining, currency)}
-                    </strong>{" "}
-                    away from free shipping
-                  </>
-                ) : (
-                  <strong className="text-ember-600">
-                    Free shipping unlocked — nice work.
-                  </strong>
-                )}
-              </p>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-onyx-100">
-                <motion.div
-                  className="h-full rounded-full bg-ember-grad"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                />
-              </div>
-            </div>
-
             {/* items */}
             <ul className="divide-y divide-onyx-100 overflow-hidden rounded-3xl border border-onyx-100 bg-white">
               {items.map((item) => {
@@ -277,11 +256,8 @@ export default function CartClient() {
                 <div className="flex gap-2">
                   <input
                     value={promo}
-                    onChange={(e) => {
-                      setPromo(e.target.value);
-                      setPromoMsg(null);
-                    }}
-                    placeholder="JOLCHAP10"
+                    onChange={(e) => setPromo(e.target.value)}
+                    placeholder="SAVE100"
                     className="h-11 flex-1 rounded-full border border-onyx-200 bg-white px-4 text-sm font-medium uppercase tracking-wide text-onyx-900 outline-none transition-colors placeholder:font-normal placeholder:tracking-normal placeholder:text-onyx-300 focus:border-onyx-950"
                   />
                   <button
@@ -291,27 +267,39 @@ export default function CartClient() {
                     Apply
                   </button>
                 </div>
-                {promoMsg && (
-                  <p className="mt-2 text-xs text-onyx-400">{promoMsg}</p>
+                {appliedPromo && (
+                  <p className="mt-2 flex items-center justify-between gap-2 text-xs">
+                    <span className="font-semibold text-ember-600">
+                      &ldquo;{appliedPromo.code}&rdquo; applied — {formatPrice(discount, currency)} off
+                    </span>
+                    <button
+                      onClick={clearPromo}
+                      className="shrink-0 text-onyx-400 underline-offset-2 hover:text-ember-600 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  </p>
                 )}
               </div>
 
               <div className="my-5 hairline" />
 
               <dl className="space-y-3 text-sm">
-                <Row label="Subtotal">
-                  {formatPrice(subtotal, currency)}
-                </Row>
-                <Row label="Shipping">
-                  {shipping === 0 ? (
+                <Row label="Subtotal">{formatPrice(subtotal, currency)}</Row>
+                <Row label="Delivery">
+                  {delivery === 0 ? (
                     <span className="font-bold text-ember-600">Free</span>
                   ) : (
-                    formatPrice(shipping, currency)
+                    formatPrice(delivery, currency)
                   )}
                 </Row>
-                <Row label="Estimated tax (8%)">
-                  {formatPrice(tax, currency)}
-                </Row>
+                {discount > 0 && (
+                  <Row label={`Discount (${appliedPromo?.code ?? ""})`}>
+                    <span className="font-bold text-ember-600">
+                      − {formatPrice(discount, currency)}
+                    </span>
+                  </Row>
+                )}
               </dl>
 
               <div className="my-5 hairline" />
@@ -325,7 +313,7 @@ export default function CartClient() {
                     {formatPrice(total, currency)}
                   </span>
                   <span className="text-xs text-onyx-400">
-                    {currency} · tax included
+                    {currency} · delivery included
                   </span>
                 </div>
               </div>
@@ -347,7 +335,7 @@ export default function CartClient() {
                   30-day no-sweat returns &amp; exchanges
                 </TrustLi>
                 <TrustLi icon={<Truck className="h-4 w-4 text-ember-500" />}>
-                  Free shipping on orders over $99
+                  Fast delivery across Bangladesh
                 </TrustLi>
               </ul>
             </div>

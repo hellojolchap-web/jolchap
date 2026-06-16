@@ -48,6 +48,8 @@ export interface Product {
   sizes: string[];
   inStock: boolean;
   stockCount: number;
+  /** Delivery charge for this product (0 or unset = free delivery). */
+  deliveryCharge?: number;
   isFeatured: boolean;
   isNew: boolean;
   isBestseller: boolean;
@@ -95,6 +97,8 @@ export interface CartItem {
   size: string | null;
   color: string | null;
   quantity: number;
+  /** Delivery charge for this product (0 = free). */
+  deliveryCharge: number;
 }
 
 export interface NavLink {

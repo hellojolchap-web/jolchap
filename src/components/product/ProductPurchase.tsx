@@ -52,6 +52,7 @@ export function ProductPurchase({ product }: { product: Product }) {
     size,
     color,
     quantity: qty,
+    deliveryCharge: product.deliveryCharge ?? 0,
   });
 
   const handleAdd = () => {

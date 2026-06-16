@@ -9,7 +9,15 @@ import { updateSettings } from "@/app/admin/actions";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { deriveAccentScale, DEFAULT_ACCENT, ACCENT_STEPS } from "@/lib/theme";
 import type { ResolvedSettings } from "@/lib/settings";
-import { Field, FormSection, Toggle, StringListEditor, fieldInput, fieldArea } from "@/components/admin/FormKit";
+import {
+  Field,
+  FormSection,
+  Toggle,
+  StringListEditor,
+  PairListEditor,
+  fieldInput,
+  fieldArea,
+} from "@/components/admin/FormKit";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { NotConfiguredNotice } from "@/components/admin/AdminUI";
 import { cn } from "@/lib/utils";
@@ -264,6 +272,27 @@ export function SettingsForm({ initial }: { initial: ResolvedSettings }) {
           onChange={(items) => setS((p) => ({ ...p, badges: items }))}
           placeholder="Bestseller"
           addLabel="Add badge"
+        />
+      </FormSection>
+
+      {/* Promo codes */}
+      <FormSection
+        title="Promo codes"
+        description="Set a code and a flat ৳ discount. Customers type the code at checkout to take that amount off their order total."
+      >
+        <PairListEditor
+          items={s.promos.map((p) => ({ a: p.code, b: String(p.discount) }))}
+          onChange={(items) =>
+            setS((prev) => ({
+              ...prev,
+              promos: items
+                .filter((x) => x.a.trim())
+                .map((x) => ({ code: x.a.trim().toUpperCase(), discount: Number(x.b) || 0 })),
+            }))
+          }
+          aPlaceholder="SAVE100"
+          bPlaceholder="100"
+          addLabel="Add promo code"
         />
       </FormSection>
     </form>

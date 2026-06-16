@@ -41,6 +41,7 @@ export interface ProductInput {
   tags: string[];
   inStock: boolean;
   stockCount: number;
+  deliveryCharge: number;
   isFeatured: boolean;
   isNew: boolean;
   isBestseller: boolean;
@@ -103,6 +104,7 @@ function productRow(input: ProductInput, id: string) {
     tags: input.tags,
     in_stock: input.inStock,
     stock_count: input.stockCount,
+    delivery_charge: input.deliveryCharge,
     is_featured: input.isFeatured,
     is_new: input.isNew,
     is_bestseller: input.isBestseller,

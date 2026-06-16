@@ -14,6 +14,9 @@ interface CartState {
   open: () => void;
   close: () => void;
   toggle: () => void;
+  /** Applied promo code (validated against settings at checkout). */
+  promoCode: string;
+  setPromoCode: (code: string) => void;
 }
 
 /** Unique line key combining product + chosen variant. */
@@ -53,10 +56,12 @@ export const useCart = create<CartState>()(
             )
             .filter((i) => i.quantity > 0),
         })),
-      clear: () => set({ items: [] }),
+      clear: () => set({ items: [], promoCode: "" }),
       open: () => set({ isOpen: true }),
       close: () => set({ isOpen: false }),
       toggle: () => set((s) => ({ isOpen: !s.isOpen })),
+      promoCode: "",
+      setPromoCode: (code) => set({ promoCode: code }),
     }),
     { name: "jolchap-cart" }
   )
@@ -68,3 +73,7 @@ export const cartCount = (items: CartItem[]) =>
 
 export const cartSubtotal = (items: CartItem[]) =>
   items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+/** Delivery = the highest per-product delivery charge in the bag (0 = all free). */
+export const cartDelivery = (items: CartItem[]) =>
+  items.length ? Math.max(0, ...items.map((i) => i.deliveryCharge || 0)) : 0;

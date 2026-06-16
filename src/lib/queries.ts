@@ -57,6 +57,7 @@ function mapProduct(r: Record<string, unknown>): Product {
     sizes: (r.sizes as string[]) ?? [],
     inStock: Boolean(r.in_stock ?? true),
     stockCount: Number(r.stock_count ?? 0),
+    deliveryCharge: Number(r.delivery_charge ?? 0),
     isFeatured: Boolean(r.is_featured),
     isNew: Boolean(r.is_new),
     isBestseller: Boolean(r.is_bestseller),

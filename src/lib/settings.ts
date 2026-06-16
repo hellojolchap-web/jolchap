@@ -68,6 +68,12 @@ export interface MenuItem {
   depth: number;
 }
 
+/** A promo / discount code: enter `code` at checkout for a flat `discount` off. */
+export interface PromoCode {
+  code: string;
+  discount: number;
+}
+
 export interface ResolvedSettings {
   brand: BrandSettings;
   contact: ContactSettings;
@@ -77,6 +83,8 @@ export interface ResolvedSettings {
   menu: MenuItem[];
   /** Selectable product ribbon labels, managed from the admin. */
   badges: string[];
+  /** Promo codes — entering `code` at checkout takes `discount` off the total. */
+  promos: PromoCode[];
 }
 
 export type PartialSettings = {
@@ -86,6 +94,7 @@ export type PartialSettings = {
   hero?: Partial<HeroSettings>;
   menu?: MenuItem[];
   badges?: string[];
+  promos?: PromoCode[];
 };
 
 export const DEFAULT_BADGES = ["Bestseller", "Popular", "New", "Hot", "Sale", "Limited"];
@@ -113,6 +122,7 @@ export const DEFAULT_SETTINGS: ResolvedSettings = {
   hero: { images: [], float: true, autoplay: true },
   menu: [],
   badges: DEFAULT_BADGES,
+  promos: [],
 };
 
 const str = (v: unknown, fallback: string): string =>
@@ -171,5 +181,17 @@ export function mergeSettings(p: PartialSettings | null | undefined): ResolvedSe
     badges: Array.isArray(p.badges) && p.badges.length
       ? p.badges.filter((s) => typeof s === "string" && s.trim())
       : d.badges,
+    promos: Array.isArray(p.promos)
+      ? p.promos
+          .filter((x) => x && typeof x.code === "string" && x.code.trim())
+          .map((x) => ({ code: x.code.trim(), discount: Math.max(0, Number(x.discount) || 0) }))
+      : d.promos,
   };
+}
+
+/** Look up a promo code (case-insensitive). Returns the matched promo or null. */
+export function findPromo(code: string, promos: PromoCode[]): PromoCode | null {
+  const c = code.trim().toUpperCase();
+  if (!c) return null;
+  return promos.find((p) => p.code.trim().toUpperCase() === c) ?? null;
 }
