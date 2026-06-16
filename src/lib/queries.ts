@@ -1,7 +1,13 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+import { createClient as createAnonClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import {
+  isSupabaseConfigured,
+  SUPABASE_ANON_KEY,
+  SUPABASE_URL,
+} from "@/lib/supabase/config";
 import {
   products as localProducts,
   productBySlug,
@@ -101,13 +107,29 @@ async function trySupabase<T>(
   }
 }
 
-/* ── Site settings ── */
+/* ── Site settings ──
+   Read in the root layout (every page), so it must stay static-friendly: a
+   cookie-free anon read wrapped in the Next data cache. Busted on save via the
+   "site-settings" tag, so edits propagate without making pages dynamic. */
+const readSettings = unstable_cache(
+  async (): Promise<ResolvedSettings> => {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return mergeSettings(null);
+    try {
+      const db = createAnonClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      const { data } = await db.from("site_settings").select("data").eq("id", 1).single();
+      return mergeSettings((data?.data as PartialSettings) ?? null);
+    } catch {
+      return mergeSettings(null);
+    }
+  },
+  ["site-settings-v1"],
+  { tags: ["site-settings"], revalidate: 3600 }
+);
+
 export async function getSettings(): Promise<ResolvedSettings> {
-  const remote = await trySupabase(async (db) => {
-    const { data } = await db.from("site_settings").select("data").eq("id", 1).single();
-    return (data?.data as PartialSettings) ?? null;
-  });
-  return mergeSettings(remote);
+  return readSettings();
 }
 
 /* ── Categories ── */

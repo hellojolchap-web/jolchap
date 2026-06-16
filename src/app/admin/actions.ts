@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import slugify from "slugify";
 
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -171,7 +171,8 @@ export async function updateSettings(input: PartialSettings): Promise<ActionResu
       .from("site_settings")
       .upsert({ id: 1, data: input }, { onConflict: "id" });
     if (error) return { ok: false, error: error.message };
-    // Settings feed the root layout — revalidate the whole site.
+    // Settings feed the root layout — bust the cache tag and revalidate the site.
+    revalidateTag("site-settings");
     revalidatePath("/", "layout");
     return { ok: true, id: "settings" };
   } catch (err) {
