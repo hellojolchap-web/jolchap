@@ -97,6 +97,8 @@ export async function generateMetadata(): Promise<Metadata> {
       title: brand.name,
       statusBarStyle: "black-translucent",
     },
+    // A custom uploaded logo also becomes the favicon / app icon.
+    ...(brand.logoUrl ? { icons: { icon: brand.logoUrl, apple: brand.logoUrl } } : {}),
     ...(googleVerification ? { verification: { google: googleVerification } } : {}),
   };
 }

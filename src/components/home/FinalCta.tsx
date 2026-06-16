@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
-import { JolchapMark } from "@/components/brand/Logo";
+import { BrandMark } from "@/components/brand/BrandMark";
 
 /**
  * Closing call-to-action. A full-bleed onyx panel over a lifestyle image,
@@ -33,7 +33,7 @@ export function FinalCta() {
           />
 
           <div className="relative mx-auto flex max-w-2xl flex-col items-center">
-            <JolchapMark badge={false} className="h-12 w-12" />
+            <BrandMark badge={false} className="h-12 w-12" />
 
             <h2 className="mt-7 text-balance text-4xl font-extrabold uppercase leading-[0.92] tracking-tightest text-white sm:text-6xl lg:text-7xl">
               Bring your idea to life.

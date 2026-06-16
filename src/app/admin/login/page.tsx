@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/brand/Logo";
+import { useSettings } from "@/components/providers/SettingsProvider";
 import { cn } from "@/lib/utils";
 
 /**
@@ -21,6 +22,7 @@ export default function AdminLoginPage() {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
+  const { brand } = useSettings();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -62,7 +64,7 @@ export default function AdminLoginPage() {
         <div className="pointer-events-none absolute inset-0 bg-grid opacity-[0.06]" />
 
         <div className="relative">
-          <Logo tone="light" withTagline />
+          <Logo tone="light" withTagline name={brand.name} logoUrl={brand.logoUrl || undefined} />
         </div>
 
         <div className="relative max-w-md">
@@ -71,7 +73,7 @@ export default function AdminLoginPage() {
             Command Centre
           </p>
           <h1 className="mt-4 font-display text-4xl font-extrabold uppercase leading-[1.02] tracking-tightest text-white">
-            Run <span className="text-ember-500">Jolchap</span>.
+            Run <span className="text-ember-500">{brand.name}</span>.
           </h1>
           <p className="mt-4 text-base leading-relaxed text-white/55">
             Manage your catalogue, publish to the journal and ship optimised
@@ -95,8 +97,7 @@ export default function AdminLoginPage() {
         </div>
 
         <p className="relative text-xs text-white/35">
-          © {new Date().getFullYear()} Jolchap Print &amp; Personalisation Studio — Authorised
-          access only.
+          © {new Date().getFullYear()} {brand.legalName} — Authorised access only.
         </p>
       </div>
 
@@ -105,7 +106,7 @@ export default function AdminLoginPage() {
         <div className="w-full max-w-sm">
           {/* Mobile brand */}
           <div className="mb-8 lg:hidden">
-            <Logo />
+            <Logo name={brand.name} logoUrl={brand.logoUrl || undefined} />
           </div>
 
           {configured ? (

@@ -19,6 +19,7 @@ import {
 
 import { Logo } from "@/components/brand/Logo";
 import { SignOutButton } from "./SignOutButton";
+import { useSettings } from "@/components/providers/SettingsProvider";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -48,13 +49,14 @@ function useActive() {
 /** The inner sidebar content, shared by the desktop rail and the mobile drawer. */
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const isActive = useActive();
+  const { brand } = useSettings();
 
   return (
     <div className="flex h-full flex-col">
       {/* Brand */}
       <div className="flex h-[72px] items-center border-b border-white/10 px-5">
-        <Link href="/admin" onClick={onNavigate} aria-label="Jolchap admin">
-          <Logo tone="light" />
+        <Link href="/admin" onClick={onNavigate} aria-label={`${brand.name} admin`}>
+          <Logo tone="light" name={brand.name} logoUrl={brand.logoUrl || undefined} />
         </Link>
       </div>
 

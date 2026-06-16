@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Home } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
-import { JolchapMark } from "@/components/brand/Logo";
+import { BrandMark } from "@/components/brand/BrandMark";
 import { mainNav } from "@/config/site";
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export default function NotFound() {
       <div className="pointer-events-none absolute left-1/2 top-0 h-96 w-96 -translate-x-1/2 rounded-full bg-ember-500/15 blur-[130px]" />
 
       <Container className="relative flex min-h-[72vh] flex-col items-center justify-center py-20 text-center sm:py-28">
-        <JolchapMark className="h-14 w-14" />
+        <BrandMark className="h-14 w-14" />
 
         <p className="text-ember-flow mt-8 font-display text-[110px] font-extrabold leading-none tracking-tightest sm:text-[170px]">
           404

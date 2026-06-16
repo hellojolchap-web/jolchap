@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { AdminSidebar, AdminMobileNav } from "@/components/admin/AdminNav";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { getSettings } from "@/lib/queries";
 import { StatusPill } from "@/components/admin/AdminUI";
 import { Logo } from "@/components/brand/Logo";
 
@@ -19,8 +20,9 @@ export const metadata: Metadata = {
  * takes over the screen — giving the admin its own dedicated chrome: a fixed
  * onyx sidebar on desktop and a slide-in drawer on mobile.
  */
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const configured = isSupabaseConfigured();
+  const { brand } = await getSettings();
 
   return (
     <div className="fixed inset-0 z-[100] flex overflow-hidden bg-bone">
@@ -37,9 +39,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link
             className="lg:hidden"
             href="/admin"
-            aria-label="Jolchap admin"
+            aria-label={`${brand.name} admin`}
           >
-            <Logo markClassName="h-8 w-8" withWordmark={false} />
+            <Logo
+              markClassName="h-8 w-8"
+              withWordmark={false}
+              name={brand.name}
+              logoUrl={brand.logoUrl || undefined}
+            />
           </Link>
 
           <div className="ml-auto flex items-center gap-3">
