@@ -106,23 +106,27 @@ export function Hero({ product }: { product: Product }) {
             <ProductShowcase product={product} float={hero.float} />
           )}
 
-          {/* floating stat */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.4, ease }}
-            className="absolute -left-4 top-10 z-10 hidden rounded-2xl border border-onyx-100 bg-white p-4 shadow-card sm:block"
-          >
-            <p className="text-2xl font-extrabold text-onyx-950">50k+</p>
-            <p className="text-xs text-onyx-500">Custom items printed</p>
-          </motion.div>
+          {/* floating stat — only on the default product showcase, so it never
+              covers a custom banner */}
+          {!hasBanners && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.4, ease }}
+              className="absolute -left-4 top-10 z-10 hidden rounded-2xl border border-onyx-100 bg-white p-4 shadow-card sm:block"
+            >
+              <p className="text-2xl font-extrabold text-onyx-950">50k+</p>
+              <p className="text-xs text-onyx-500">Custom items printed</p>
+            </motion.div>
+          )}
         </motion.div>
       </div>
     </section>
   );
 }
 
-/* Settings-driven banner slideshow with optional auto-play + float. */
+/* Settings-driven banner slideshow. Each image shows in FULL (no crop): the
+   frame takes on each image's own aspect ratio and animates as slides change. */
 function BannerSlideshow({
   images,
   float,
@@ -133,6 +137,7 @@ function BannerSlideshow({
   autoplay: boolean;
 }) {
   const [idx, setIdx] = useState(0);
+  const [ratios, setRatios] = useState<Record<number, number>>({});
 
   useEffect(() => {
     if (!autoplay || images.length < 2) return;
@@ -140,12 +145,15 @@ function BannerSlideshow({
     return () => clearInterval(t);
   }, [autoplay, images.length]);
 
+  const ratio = ratios[idx];
+
   return (
     <div
       className={cn(
-        "relative aspect-[4/3] overflow-hidden rounded-[2rem] bg-onyx-950 shadow-elevated",
+        "relative mx-auto w-full overflow-hidden rounded-[2rem] bg-bone shadow-elevated transition-[aspect-ratio] duration-500 ease-out",
         float && "animate-float"
       )}
+      style={{ aspectRatio: ratio ? String(ratio) : "4 / 5" }}
     >
       {images.map((src, i) => (
         // eslint-disable-next-line @next/next/no-img-element
@@ -153,24 +161,30 @@ function BannerSlideshow({
           key={`${src}-${i}`}
           src={src}
           alt=""
+          onLoad={(e) => {
+            const el = e.currentTarget;
+            if (el.naturalWidth && el.naturalHeight) {
+              const r = el.naturalWidth / el.naturalHeight;
+              setRatios((prev) => (prev[i] ? prev : { ...prev, [i]: r }));
+            }
+          }}
           className={cn(
-            "absolute inset-0 h-full w-full object-cover transition-opacity duration-700",
+            "absolute inset-0 h-full w-full object-contain transition-opacity duration-700",
             i === idx ? "opacity-100" : "opacity-0"
           )}
         />
       ))}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-onyx-950/30 via-transparent to-transparent" />
 
       {images.length > 1 && (
-        <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
+        <div className="absolute inset-x-0 bottom-4 z-10 flex justify-center gap-2">
           {images.map((_, i) => (
             <button
               key={i}
               onClick={() => setIdx(i)}
               aria-label={`Show slide ${i + 1}`}
               className={cn(
-                "h-2 rounded-full bg-white transition-all",
-                i === idx ? "w-6 opacity-100" : "w-2 opacity-50 hover:opacity-80"
+                "h-2 rounded-full bg-onyx-950/70 transition-all",
+                i === idx ? "w-6 opacity-100" : "w-2 opacity-40 hover:opacity-70"
               )}
             />
           ))}

@@ -1,4 +1,4 @@
-import type { NavGroup, NavLink } from "@/types";
+import type { Category, NavGroup, NavLink } from "@/types";
 
 /**
  * Single source of truth for brand-level content.
@@ -207,5 +207,28 @@ export const footerNav: { heading: string; links: NavLink[] }[] = [
     ],
   },
 ];
+
+/**
+ * Header / mobile navigation, built from the live category list. Every category
+ * collapses under a single "Categories" dropdown, with Home / Blog / Offers
+ * alongside — so adding a category just adds it to that dropdown.
+ */
+export function buildMainNav(categories: Pick<Category, "slug" | "name">[]): NavGroup[] {
+  return [
+    { label: "Home", href: "/" },
+    {
+      label: "Categories",
+      href: "/shop",
+      columns: [
+        {
+          heading: "Shop by category",
+          links: categories.map((c) => ({ label: c.name, href: `/category/${c.slug}` })),
+        },
+      ],
+    },
+    { label: "Blog", href: "/blog" },
+    { label: "Offers", href: "/shop?sale=true" },
+  ];
+}
 
 export type SiteConfig = typeof siteConfig;

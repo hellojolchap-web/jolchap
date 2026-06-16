@@ -10,7 +10,8 @@ import { MobileNav } from "./MobileNav";
 import { SearchOverlay } from "./SearchOverlay";
 import { useCart, cartCount } from "@/lib/store/cart";
 import { useSettings } from "@/components/providers/SettingsProvider";
-import type { Category, NavGroup } from "@/types";
+import { buildMainNav } from "@/config/site";
+import type { Category } from "@/types";
 import { cn } from "@/lib/utils";
 
 export function Header({ categories }: { categories: Category[] }) {
@@ -25,11 +26,7 @@ export function Header({ categories }: { categories: Category[] }) {
   const count = cartCount(items);
   const { brand } = useSettings();
 
-  const nav: NavGroup[] = [
-    ...categories.map((c) => ({ label: c.name, href: `/category/${c.slug}` })),
-    { label: "Blog", href: "/blog" },
-    { label: "Offers", href: "/shop?sale=true" },
-  ];
+  const nav = buildMainNav(categories);
 
   useEffect(() => setMounted(true), []);
   useEffect(() => {
@@ -53,14 +50,14 @@ export function Header({ categories }: { categories: Category[] }) {
         onMouseLeave={() => setActive(null)}
       >
         <div className="container flex h-[72px] items-center justify-between gap-4">
-          {/* left */}
+          {/* left — search (mobile) + logo */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open menu"
-              className="grid h-10 w-10 place-items-center rounded-full text-onyx-900 hover:bg-onyx-100 lg:hidden"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search"
+              className="grid h-10 w-10 place-items-center rounded-full text-onyx-900 transition-colors hover:bg-onyx-100 lg:hidden"
             >
-              <Menu className="h-5 w-5" />
+              <Search className="h-[19px] w-[19px]" />
             </button>
             <Link href="/" aria-label={`${brand.name} home`}>
               <Logo animated name={brand.name} logoUrl={brand.logoUrl || undefined} />
@@ -90,12 +87,12 @@ export function Header({ categories }: { categories: Category[] }) {
             ))}
           </nav>
 
-          {/* right */}
+          {/* right — search (desktop), account, cart, hamburger (mobile, last) */}
           <div className="flex items-center gap-1">
             <button
               onClick={() => setSearchOpen(true)}
               aria-label="Search"
-              className="grid h-10 w-10 place-items-center rounded-full text-onyx-900 transition-colors hover:bg-onyx-100"
+              className="hidden h-10 w-10 place-items-center rounded-full text-onyx-900 transition-colors hover:bg-onyx-100 lg:grid"
             >
               <Search className="h-[19px] w-[19px]" />
             </button>
@@ -117,6 +114,13 @@ export function Header({ categories }: { categories: Category[] }) {
                   {count}
                 </span>
               )}
+            </button>
+            <button
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+              className="grid h-10 w-10 place-items-center rounded-full text-onyx-900 transition-colors hover:bg-onyx-100 lg:hidden"
+            >
+              <Menu className="h-5 w-5" />
             </button>
           </div>
         </div>

@@ -83,14 +83,14 @@ export function ShopBrowser({ products, categories, initial }: ShopBrowserProps)
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Only surface categories that actually contain products.
+  // Show every published category (matching the nav), with a live product count.
   const shownCategories = useMemo(() => {
     const counts = new Map<string, number>();
     for (const p of products) {
       counts.set(p.categorySlug, (counts.get(p.categorySlug) ?? 0) + 1);
     }
-    return categories
-      .filter((c) => counts.has(c.slug))
+    return [...categories]
+      .sort((a, b) => a.sort - b.sort)
       .map((c) => ({ ...c, count: counts.get(c.slug) ?? 0 }));
   }, [products, categories]);
 

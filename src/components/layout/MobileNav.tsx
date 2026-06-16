@@ -7,7 +7,8 @@ import { ChevronDown, X, Phone, Mail } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
 import { useSettings } from "@/components/providers/SettingsProvider";
-import type { Category, NavGroup } from "@/types";
+import { buildMainNav } from "@/config/site";
+import type { Category } from "@/types";
 import { cn } from "@/lib/utils";
 
 export function MobileNav({
@@ -22,11 +23,7 @@ export function MobileNav({
   const [expanded, setExpanded] = useState<string | null>(null);
   const { contact, brand } = useSettings();
 
-  const nav: NavGroup[] = [
-    ...categories.map((c) => ({ label: c.name, href: `/category/${c.slug}` })),
-    { label: "Blog", href: "/blog" },
-    { label: "Offers", href: "/shop?sale=true" },
-  ];
+  const nav = buildMainNav(categories);
 
   return (
     <AnimatePresence>
