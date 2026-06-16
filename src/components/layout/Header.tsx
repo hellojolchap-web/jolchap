@@ -10,7 +10,7 @@ import { MobileNav } from "./MobileNav";
 import { SearchOverlay } from "./SearchOverlay";
 import { useCart, cartCount } from "@/lib/store/cart";
 import { useSettings } from "@/components/providers/SettingsProvider";
-import { buildMainNav } from "@/config/site";
+import { resolveMainNav } from "@/config/site";
 import type { Category } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -24,9 +24,9 @@ export function Header({ categories }: { categories: Category[] }) {
   const items = useCart((s) => s.items);
   const openCart = useCart((s) => s.open);
   const count = cartCount(items);
-  const { brand } = useSettings();
+  const { brand, menu } = useSettings();
 
-  const nav = buildMainNav(categories);
+  const nav = resolveMainNav(menu, categories);
 
   useEffect(() => setMounted(true), []);
   useEffect(() => {

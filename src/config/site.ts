@@ -1,4 +1,5 @@
 import type { Category, NavGroup, NavLink } from "@/types";
+import type { MenuItem } from "@/lib/settings"; // type-only — no runtime cycle
 
 /**
  * Single source of truth for brand-level content.
@@ -229,6 +230,39 @@ export function buildMainNav(categories: Pick<Category, "slug" | "name">[]): Nav
     { label: "Blog", href: "/blog" },
     { label: "Offers", href: "/shop?sale=true" },
   ];
+}
+
+/**
+ * Convert a flat, depth-tagged custom menu into the header's NavGroup shape:
+ * depth-0 items become top-level links; deeper items become dropdown links
+ * under the nearest top-level item above them.
+ */
+export function menuToNav(items: MenuItem[]): NavGroup[] {
+  const groups: NavGroup[] = [];
+  for (const it of items) {
+    if (it.depth <= 0 || groups.length === 0) {
+      groups.push({ label: it.label, href: it.href });
+    } else {
+      const parent = groups[groups.length - 1];
+      const links: NavLink[] = [
+        ...(parent.columns?.[0]?.links ?? []),
+        { label: it.label, href: it.href },
+      ];
+      groups[groups.length - 1] = {
+        ...parent,
+        columns: [{ heading: parent.label, links }],
+      };
+    }
+  }
+  return groups;
+}
+
+/** The site's main nav: a custom menu if the owner built one, else the default. */
+export function resolveMainNav(
+  menu: MenuItem[],
+  categories: Pick<Category, "slug" | "name">[]
+): NavGroup[] {
+  return menu && menu.length ? menuToNav(menu) : buildMainNav(categories);
 }
 
 export type SiteConfig = typeof siteConfig;

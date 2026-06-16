@@ -7,7 +7,7 @@ import { ChevronDown, X, Phone, Mail } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
 import { useSettings } from "@/components/providers/SettingsProvider";
-import { buildMainNav } from "@/config/site";
+import { resolveMainNav } from "@/config/site";
 import type { Category } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -21,9 +21,9 @@ export function MobileNav({
   categories: Category[];
 }) {
   const [expanded, setExpanded] = useState<string | null>(null);
-  const { contact, brand } = useSettings();
+  const { contact, brand, menu } = useSettings();
 
-  const nav = buildMainNav(categories);
+  const nav = resolveMainNav(menu, categories);
 
   return (
     <AnimatePresence>

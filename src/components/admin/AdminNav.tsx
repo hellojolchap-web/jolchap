@@ -9,6 +9,7 @@ import {
   Shapes,
   Newspaper,
   ImageIcon,
+  ListTree,
   Settings,
   Store,
   Menu,
@@ -34,6 +35,7 @@ const NAV: NavItem[] = [
   { label: "Categories", href: "/admin/categories", icon: Shapes, startsWith: true },
   { label: "Journal", href: "/admin/blog", icon: Newspaper, startsWith: true },
   { label: "Media", href: "/admin/media", icon: ImageIcon, startsWith: true },
+  { label: "Menu", href: "/admin/menu", icon: ListTree, startsWith: true },
   { label: "Settings", href: "/admin/settings", icon: Settings, startsWith: true },
 ];
 

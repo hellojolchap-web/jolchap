@@ -60,11 +60,21 @@ export interface HeroSettings {
   autoplay: boolean;
 }
 
+/** A single navigation menu entry. `depth` (0=top, 1=sub, 2=sub-sub) drives nesting. */
+export interface MenuItem {
+  id: string;
+  label: string;
+  href: string;
+  depth: number;
+}
+
 export interface ResolvedSettings {
   brand: BrandSettings;
   contact: ContactSettings;
   socials: SocialSettings;
   hero: HeroSettings;
+  /** Custom navigation menu — empty means the default auto nav is used. */
+  menu: MenuItem[];
   /** Selectable product ribbon labels, managed from the admin. */
   badges: string[];
 }
@@ -74,6 +84,7 @@ export type PartialSettings = {
   contact?: Partial<Omit<ContactSettings, "address">> & { address?: Partial<AddressSettings> };
   socials?: Partial<SocialSettings>;
   hero?: Partial<HeroSettings>;
+  menu?: MenuItem[];
   badges?: string[];
 };
 
@@ -100,6 +111,7 @@ export const DEFAULT_SETTINGS: ResolvedSettings = {
   },
   socials: { ...siteConfig.socials },
   hero: { images: [], float: true, autoplay: true },
+  menu: [],
   badges: DEFAULT_BADGES,
 };
 
@@ -146,6 +158,16 @@ export function mergeSettings(p: PartialSettings | null | undefined): ResolvedSe
       float: typeof p.hero?.float === "boolean" ? p.hero.float : d.hero.float,
       autoplay: typeof p.hero?.autoplay === "boolean" ? p.hero.autoplay : d.hero.autoplay,
     },
+    menu: Array.isArray(p.menu)
+      ? p.menu
+          .filter((m) => m && typeof m.label === "string" && typeof m.href === "string")
+          .map((m, i) => ({
+            id: typeof m.id === "string" && m.id ? m.id : `m${i}`,
+            label: m.label,
+            href: m.href,
+            depth: Math.max(0, Math.min(2, Number(m.depth) || 0)),
+          }))
+      : d.menu,
     badges: Array.isArray(p.badges) && p.badges.length
       ? p.badges.filter((s) => typeof s === "string" && s.trim())
       : d.badges,
