@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { Fragment, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Plus,
@@ -61,6 +61,9 @@ export function MenuBuilder({
   const [items, setItems] = useState<MenuItem[]>(initial.menu);
   const [custom, setCustom] = useState({ label: "", href: "" });
   const [pending, startTransition] = useTransition();
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+  const [dropInfo, setDropInfo] = useState<{ index: number; depth: number } | null>(null);
+  const listRef = useRef<HTMLUListElement>(null);
 
   const add = (label: string, href: string) =>
     setItems((prev) => [...prev, { id: newId(), label, href, depth: 0 }]);
@@ -91,6 +94,45 @@ export function MenuBuilder({
 
   const outdent = (idx: number) =>
     setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, depth: Math.max(0, it.depth - 1) } : it)));
+
+  /* ── Drag and drop: reorder, and drag right to nest ── */
+  function handleDragOver(e: React.DragEvent) {
+    if (draggedIdx === null) return;
+    e.preventDefault();
+    const ul = listRef.current;
+    if (!ul) return;
+    const rows = Array.from(ul.querySelectorAll<HTMLElement>("[data-row]"));
+    let index = items.length;
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i].getBoundingClientRect();
+      if (e.clientY < r.top + r.height / 2) {
+        index = i;
+        break;
+      }
+    }
+    const aboveDepth = index - 1 >= 0 && index - 1 < items.length ? items[index - 1].depth : -1;
+    const maxDepth = Math.max(0, Math.min(2, aboveDepth + 1));
+    const rawDepth = Math.round((e.clientX - ul.getBoundingClientRect().left - 16) / 28);
+    setDropInfo({ index, depth: Math.max(0, Math.min(maxDepth, rawDepth)) });
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    if (draggedIdx === null || !dropInfo) {
+      setDraggedIdx(null);
+      setDropInfo(null);
+      return;
+    }
+    const next = [...items];
+    const [dragged] = next.splice(draggedIdx, 1);
+    let insertAt = dropInfo.index;
+    if (draggedIdx < dropInfo.index) insertAt -= 1;
+    insertAt = Math.max(0, Math.min(next.length, insertAt));
+    next.splice(insertAt, 0, { ...dragged, depth: dropInfo.depth });
+    setItems(next);
+    setDraggedIdx(null);
+    setDropInfo(null);
+  }
 
   async function removeItem(item: MenuItem) {
     const ok = await confirm({
@@ -212,8 +254,9 @@ export function MenuBuilder({
             Menu structure
           </h2>
           <p className="mb-4 text-xs text-onyx-400">
-            Use <ChevronRight className="inline h-3 w-3" /> to nest an item under the one above it,
-            and the arrows to reorder.
+            Drag the <GripVertical className="inline h-3 w-3" /> handle to reorder — drag to the right to
+            nest under the item above. Or use the <ChevronLeft className="inline h-3 w-3" />{" "}
+            <ChevronRight className="inline h-3 w-3" /> buttons.
           </p>
 
           {items.length === 0 ? (
@@ -221,59 +264,79 @@ export function MenuBuilder({
               No items yet — add pages, categories or links from the left.
             </div>
           ) : (
-            <ul className="space-y-2">
+            <ul ref={listRef} className="space-y-2" onDragOver={handleDragOver} onDrop={handleDrop}>
               {items.map((item, idx) => (
-                <li
-                  key={item.id}
-                  style={{ marginLeft: item.depth * 28 }}
-                  className={cn(
-                    "flex items-center gap-2 rounded-xl border bg-white p-2.5 transition-colors",
-                    item.depth === 0 ? "border-onyx-200" : "border-onyx-100 bg-onyx-50/40"
-                  )}
-                >
-                  <GripVertical className="h-4 w-4 flex-shrink-0 text-onyx-300" />
-
-                  <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-center">
-                    <input
-                      value={item.label}
-                      onChange={(e) => patch(item.id, { label: e.target.value })}
-                      className="w-full rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm font-semibold text-onyx-950 outline-none transition-colors hover:border-onyx-200 focus:border-ember-400"
-                      placeholder="Label"
+                <Fragment key={item.id}>
+                  {dropInfo?.index === idx && (
+                    <div
+                      style={{ marginLeft: dropInfo.depth * 28 }}
+                      className="h-1.5 rounded-full bg-ember-400"
                     />
-                    <div className="flex items-center gap-1 sm:w-1/2">
-                      <Link2 className="h-3.5 w-3.5 flex-shrink-0 text-onyx-300" />
-                      <input
-                        value={item.href}
-                        onChange={(e) => patch(item.id, { href: e.target.value })}
-                        className="w-full rounded-lg border border-transparent bg-transparent px-1 py-1 font-mono text-xs text-onyx-500 outline-none transition-colors hover:border-onyx-200 focus:border-ember-400"
-                        placeholder="/link"
-                      />
-                    </div>
-                  </div>
+                  )}
+                  <li
+                    data-row
+                    draggable
+                    onDragStart={() => setDraggedIdx(idx)}
+                    onDragEnd={() => {
+                      setDraggedIdx(null);
+                      setDropInfo(null);
+                    }}
+                    style={{ marginLeft: item.depth * 28, opacity: draggedIdx === idx ? 0.4 : 1 }}
+                    className={cn(
+                      "flex items-center gap-2 rounded-xl border bg-white p-2.5 transition-colors",
+                      item.depth === 0 ? "border-onyx-200" : "border-onyx-100 bg-onyx-50/40"
+                    )}
+                  >
+                    <GripVertical className="h-4 w-4 flex-shrink-0 cursor-grab text-onyx-300 active:cursor-grabbing" />
 
-                  <div className="flex flex-shrink-0 items-center">
-                    <IconBtn onClick={() => outdent(idx)} disabled={item.depth === 0} label="Outdent">
-                      <ChevronLeft className="h-4 w-4" />
-                    </IconBtn>
-                    <IconBtn
-                      onClick={() => indent(idx)}
-                      disabled={idx === 0 || item.depth >= Math.min(2, (items[idx - 1]?.depth ?? 0) + 1)}
-                      label="Indent (nest)"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </IconBtn>
-                    <IconBtn onClick={() => move(idx, -1)} disabled={idx === 0} label="Move up">
-                      <ArrowUp className="h-4 w-4" />
-                    </IconBtn>
-                    <IconBtn onClick={() => move(idx, 1)} disabled={idx === items.length - 1} label="Move down">
-                      <ArrowDown className="h-4 w-4" />
-                    </IconBtn>
-                    <IconBtn onClick={() => removeItem(item)} label="Remove" danger>
-                      <Trash2 className="h-4 w-4" />
-                    </IconBtn>
-                  </div>
-                </li>
+                    <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-center">
+                      <input
+                        value={item.label}
+                        onChange={(e) => patch(item.id, { label: e.target.value })}
+                        className="w-full rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm font-semibold text-onyx-950 outline-none transition-colors hover:border-onyx-200 focus:border-ember-400"
+                        placeholder="Label"
+                      />
+                      <div className="flex items-center gap-1 sm:w-1/2">
+                        <Link2 className="h-3.5 w-3.5 flex-shrink-0 text-onyx-300" />
+                        <input
+                          value={item.href}
+                          onChange={(e) => patch(item.id, { href: e.target.value })}
+                          className="w-full rounded-lg border border-transparent bg-transparent px-1 py-1 font-mono text-xs text-onyx-500 outline-none transition-colors hover:border-onyx-200 focus:border-ember-400"
+                          placeholder="/link"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-shrink-0 items-center">
+                      <IconBtn onClick={() => outdent(idx)} disabled={item.depth === 0} label="Outdent">
+                        <ChevronLeft className="h-4 w-4" />
+                      </IconBtn>
+                      <IconBtn
+                        onClick={() => indent(idx)}
+                        disabled={idx === 0 || item.depth >= Math.min(2, (items[idx - 1]?.depth ?? 0) + 1)}
+                        label="Indent (nest)"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </IconBtn>
+                      <IconBtn onClick={() => move(idx, -1)} disabled={idx === 0} label="Move up">
+                        <ArrowUp className="h-4 w-4" />
+                      </IconBtn>
+                      <IconBtn onClick={() => move(idx, 1)} disabled={idx === items.length - 1} label="Move down">
+                        <ArrowDown className="h-4 w-4" />
+                      </IconBtn>
+                      <IconBtn onClick={() => removeItem(item)} label="Remove" danger>
+                        <Trash2 className="h-4 w-4" />
+                      </IconBtn>
+                    </div>
+                  </li>
+                </Fragment>
               ))}
+              {dropInfo?.index === items.length && (
+                <div
+                  style={{ marginLeft: dropInfo.depth * 28 }}
+                  className="h-1.5 rounded-full bg-ember-400"
+                />
+              )}
             </ul>
           )}
         </div>

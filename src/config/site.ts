@@ -265,4 +265,58 @@ export function resolveMainNav(
   return menu && menu.length ? menuToNav(menu) : buildMainNav(categories);
 }
 
+/* ── Nested navigation tree (supports 3 levels: top → sub → sub-sub) ─────── */
+
+export interface NavNode {
+  label: string;
+  href: string;
+  children: NavNode[];
+}
+
+/** Default nav tree: Home, a Categories group (all categories), Blog, Offers. */
+export function defaultNavTree(categories: Pick<Category, "slug" | "name">[]): NavNode[] {
+  return [
+    { label: "Home", href: "/", children: [] },
+    {
+      label: "Categories",
+      href: "/shop",
+      children: categories.map((c) => ({
+        label: c.name,
+        href: `/category/${c.slug}`,
+        children: [],
+      })),
+    },
+    { label: "Blog", href: "/blog", children: [] },
+    { label: "Offers", href: "/shop?sale=true", children: [] },
+  ];
+}
+
+/** Build a nested tree from the flat, depth-tagged custom menu. */
+export function menuTree(items: MenuItem[]): NavNode[] {
+  const root: NavNode[] = [];
+  const lastAtDepth: NavNode[] = [];
+  for (const it of items) {
+    const node: NavNode = { label: it.label, href: it.href, children: [] };
+    const d = Math.max(0, Math.min(2, Number(it.depth) || 0));
+    if (d === 0 || !lastAtDepth[d - 1]) {
+      root.push(node);
+      lastAtDepth[0] = node;
+      lastAtDepth.length = 1;
+    } else {
+      lastAtDepth[d - 1].children.push(node);
+      lastAtDepth[d] = node;
+      lastAtDepth.length = d + 1;
+    }
+  }
+  return root;
+}
+
+/** The nav tree to render: the owner's custom menu if any, else the default. */
+export function resolveNavTree(
+  menu: MenuItem[],
+  categories: Pick<Category, "slug" | "name">[]
+): NavNode[] {
+  return menu && menu.length ? menuTree(menu) : defaultNavTree(categories);
+}
+
 export type SiteConfig = typeof siteConfig;

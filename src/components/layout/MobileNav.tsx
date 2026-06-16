@@ -7,7 +7,7 @@ import { ChevronDown, X, Phone, Mail } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
 import { useSettings } from "@/components/providers/SettingsProvider";
-import { resolveMainNav } from "@/config/site";
+import { resolveNavTree, type NavNode } from "@/config/site";
 import type { Category } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -20,10 +20,8 @@ export function MobileNav({
   onClose: () => void;
   categories: Category[];
 }) {
-  const [expanded, setExpanded] = useState<string | null>(null);
   const { contact, brand, menu } = useSettings();
-
-  const nav = resolveMainNav(menu, categories);
+  const nav = resolveNavTree(menu, categories);
 
   return (
     <AnimatePresence>
@@ -60,58 +58,9 @@ export function MobileNav({
             </div>
 
             <nav className="flex-1 overflow-y-auto px-3 py-4">
-              {nav.map((group) => {
-                const hasChildren = !!group.columns?.length;
-                const isOpen = expanded === group.label;
-                return (
-                  <div key={group.label} className="border-b border-onyx-100/80">
-                    <div className="flex items-center">
-                      <Link
-                        href={group.href}
-                        onClick={onClose}
-                        className="flex-1 py-4 pl-2 text-lg font-semibold text-onyx-900"
-                      >
-                        {group.label}
-                      </Link>
-                      {hasChildren && (
-                        <button
-                          aria-label={`Toggle ${group.label}`}
-                          onClick={() => setExpanded(isOpen ? null : group.label)}
-                          className="grid h-10 w-10 place-items-center text-onyx-500"
-                        >
-                          <ChevronDown
-                            className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")}
-                          />
-                        </button>
-                      )}
-                    </div>
-                    <AnimatePresence initial={false}>
-                      {hasChildren && isOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.25 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="grid grid-cols-2 gap-x-3 gap-y-1 pb-4 pl-2">
-                            {group.columns!.flatMap((col) => col.links).map((link) => (
-                              <Link
-                                key={link.href + link.label}
-                                href={link.href}
-                                onClick={onClose}
-                                className="rounded-lg py-2 text-sm text-onyx-500 hover:text-ember-600"
-                              >
-                                {link.label}
-                              </Link>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
+              {nav.map((node, i) => (
+                <NavRow key={`${node.label}-${i}`} node={node} onClose={onClose} depth={0} />
+              ))}
             </nav>
 
             <div className="space-y-3 border-t border-onyx-100 px-5 py-5">
@@ -139,5 +88,62 @@ export function MobileNav({
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+/* One nav row — recurses for nested children with an expand toggle. */
+function NavRow({
+  node,
+  onClose,
+  depth,
+}: {
+  node: NavNode;
+  onClose: () => void;
+  depth: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const hasChildren = node.children.length > 0;
+
+  return (
+    <div className="border-b border-onyx-100/70 last:border-0">
+      <div className="flex items-center">
+        <Link
+          href={node.href}
+          onClick={onClose}
+          style={{ paddingLeft: 8 + depth * 16 }}
+          className={cn(
+            "flex-1 py-3.5 font-semibold text-onyx-900",
+            depth === 0 ? "text-lg" : "text-base text-onyx-700"
+          )}
+        >
+          {node.label}
+        </Link>
+        {hasChildren && (
+          <button
+            aria-label={`Toggle ${node.label}`}
+            onClick={() => setOpen((o) => !o)}
+            className="grid h-10 w-10 place-items-center text-onyx-500"
+          >
+            <ChevronDown className={cn("h-5 w-5 transition-transform", open && "rotate-180")} />
+          </button>
+        )}
+      </div>
+
+      <AnimatePresence initial={false}>
+        {hasChildren && open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden"
+          >
+            {node.children.map((child, i) => (
+              <NavRow key={`${child.label}-${i}`} node={child} onClose={onClose} depth={depth + 1} />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
