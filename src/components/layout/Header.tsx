@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Search, ShoppingBag } from "lucide-react";
+import { Menu, Search, ShoppingBag, User } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { MobileNav } from "./MobileNav";
 import { SearchOverlay } from "./SearchOverlay";
@@ -99,6 +99,13 @@ export function Header({ categories }: { categories: Category[] }) {
             >
               <Search className="h-[19px] w-[19px]" />
             </button>
+            <Link
+              href="/admin"
+              aria-label="Account / admin login"
+              className="hidden h-10 w-10 place-items-center rounded-full text-onyx-900 transition-colors hover:bg-onyx-100 sm:grid"
+            >
+              <User className="h-[19px] w-[19px]" />
+            </Link>
             <button
               onClick={openCart}
               aria-label="Open cart"
