@@ -10,7 +10,7 @@ import { CartDrawer } from "@/components/cart/CartDrawer";
 import { SettingsProvider } from "@/components/providers/SettingsProvider";
 import { ConfirmProvider } from "@/components/providers/ConfirmProvider";
 import { siteConfig } from "@/config/site";
-import { getSettings } from "@/lib/queries";
+import { getSettings, getNavCategories } from "@/lib/queries";
 import { accentStyle } from "@/lib/theme";
 import "./globals.css";
 
@@ -114,7 +114,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const settings = await getSettings();
+  const [settings, navCategories] = await Promise.all([getSettings(), getNavCategories()]);
   const themeCss = accentStyle(settings.brand.accentColor);
 
   return (
@@ -131,8 +131,8 @@ export default async function RootLayout({
           <ConfirmProvider>
             <SiteShell
               announcement={<AnnouncementBar />}
-              header={<Header />}
-              footer={<Footer settings={settings} />}
+              header={<Header categories={navCategories} />}
+              footer={<Footer settings={settings} categories={navCategories} />}
               widgets={<FloatingWidgets />}
               cart={<CartDrawer />}
             >

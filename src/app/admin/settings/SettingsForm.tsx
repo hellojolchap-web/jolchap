@@ -9,7 +9,7 @@ import { updateSettings } from "@/app/admin/actions";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { deriveAccentScale, DEFAULT_ACCENT, ACCENT_STEPS } from "@/lib/theme";
 import type { ResolvedSettings } from "@/lib/settings";
-import { Field, FormSection, Toggle, fieldInput, fieldArea } from "@/components/admin/FormKit";
+import { Field, FormSection, Toggle, StringListEditor, fieldInput, fieldArea } from "@/components/admin/FormKit";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { NotConfiguredNotice } from "@/components/admin/AdminUI";
 import { cn } from "@/lib/utils";
@@ -252,6 +252,19 @@ export function SettingsForm({ initial }: { initial: ResolvedSettings }) {
             description="Advance images automatically"
           />
         </div>
+      </FormSection>
+
+      {/* Product badges */}
+      <FormSection
+        title="Product badges"
+        description="The ribbon labels you can put on products. Add or remove them here — they appear in the product editor's Badge dropdown."
+      >
+        <StringListEditor
+          items={s.badges}
+          onChange={(items) => setS((p) => ({ ...p, badges: items }))}
+          placeholder="Bestseller"
+          addLabel="Add badge"
+        />
       </FormSection>
     </form>
   );

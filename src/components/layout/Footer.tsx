@@ -4,6 +4,7 @@ import { Logo } from "@/components/brand/Logo";
 import { NewsletterForm } from "./NewsletterForm";
 import { footerNav, siteConfig } from "@/config/site";
 import type { ResolvedSettings } from "@/lib/settings";
+import type { Category } from "@/types";
 
 function TikTok({ className }: { className?: string }) {
   return (
@@ -13,8 +14,21 @@ function TikTok({ className }: { className?: string }) {
   );
 }
 
-export function Footer({ settings }: { settings: ResolvedSettings }) {
+export function Footer({
+  settings,
+  categories,
+}: {
+  settings: ResolvedSettings;
+  categories: Category[];
+}) {
   const { brand, contact, socials: social } = settings;
+  const shopLinks = [
+    ...categories.map((c) => ({ label: c.name, href: `/category/${c.slug}` })),
+    { label: "New Arrivals", href: "/shop?sort=new" },
+  ];
+  const columns = footerNav.map((col) =>
+    col.heading === "Shop" ? { ...col, links: shopLinks } : col
+  );
   const socials = [
     { href: social.instagram, label: "Instagram", Icon: Instagram },
     { href: social.facebook, label: "Facebook", Icon: Facebook },
@@ -84,7 +98,7 @@ export function Footer({ settings }: { settings: ResolvedSettings }) {
             </ul>
           </div>
 
-          {footerNav.map((col) => (
+          {columns.map((col) => (
             <div key={col.heading} className="lg:col-span-2">
               <p className="mb-4 text-xs font-bold uppercase tracking-widest text-white/40">
                 {col.heading}

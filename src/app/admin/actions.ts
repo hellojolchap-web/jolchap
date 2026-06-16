@@ -46,6 +46,17 @@ export interface ProductInput {
   isBestseller: boolean;
 }
 
+export interface CategoryInput {
+  id?: string;
+  slug: string;
+  name: string;
+  tagline: string;
+  description: string;
+  icon: string;
+  image: string;
+  sort: number;
+}
+
 export interface PostInput {
   id?: string;
   slug: string;
@@ -158,6 +169,78 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
     return { ok: true, id };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "Failed to delete product." };
+  }
+}
+
+/* ── Categories ───────────────────────────────────────────────────────────── */
+
+function categoryRow(input: CategoryInput, id: string) {
+  return {
+    id,
+    slug: input.slug,
+    name: input.name,
+    tagline: input.tagline,
+    description: input.description,
+    icon: input.icon || "Stamp",
+    image: input.image,
+    sort: input.sort,
+  };
+}
+
+function revalidateCategoryRoutes(slug: string) {
+  // Categories drive the nav, footer, homepage & filters — refresh the whole site.
+  revalidateTag("categories");
+  revalidatePath("/", "layout");
+  revalidatePath("/shop");
+  revalidatePath(`/category/${slug}`);
+}
+
+export async function createCategory(input: CategoryInput): Promise<ActionResult> {
+  if (!isSupabaseAdminConfigured()) return { ok: false, error: NOT_CONFIGURED };
+  const id = input.id?.trim() || idFromSlug("cat", input.slug);
+  try {
+    const admin = createAdminClient();
+    const { error } = await admin.from("categories").insert(categoryRow(input, id));
+    if (error) {
+      if (error.code === "23505")
+        return { ok: false, error: `A category with the slug "${input.slug}" already exists.` };
+      return { ok: false, error: error.message };
+    }
+    revalidateCategoryRoutes(input.slug);
+    return { ok: true, id };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to create category." };
+  }
+}
+
+export async function updateCategory(input: CategoryInput): Promise<ActionResult> {
+  if (!isSupabaseAdminConfigured()) return { ok: false, error: NOT_CONFIGURED };
+  const id = input.id?.trim() || idFromSlug("cat", input.slug);
+  try {
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from("categories")
+      .upsert(categoryRow(input, id), { onConflict: "id" });
+    if (error) return { ok: false, error: error.message };
+    revalidateCategoryRoutes(input.slug);
+    return { ok: true, id };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to update category." };
+  }
+}
+
+export async function deleteCategory(id: string): Promise<ActionResult> {
+  if (!isSupabaseAdminConfigured()) return { ok: false, error: NOT_CONFIGURED };
+  try {
+    const admin = createAdminClient();
+    const { error } = await admin.from("categories").delete().eq("id", id);
+    if (error) return { ok: false, error: error.message };
+    revalidateTag("categories");
+    revalidatePath("/", "layout");
+    revalidatePath("/shop");
+    return { ok: true, id };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to delete category." };
   }
 }
 

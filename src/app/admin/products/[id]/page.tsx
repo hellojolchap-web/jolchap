@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, PackageX } from "lucide-react";
 
-import { getProducts } from "@/lib/queries";
+import { getProducts, getCategories } from "@/lib/queries";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { Panel } from "@/components/admin/AdminUI";
 
@@ -11,7 +11,7 @@ export default async function EditProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const products = await getProducts();
+  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
   // Match by id first; fall back to slug so links remain robust.
   const product = products.find((p) => p.id === id) ?? products.find((p) => p.slug === id);
 
@@ -48,5 +48,5 @@ export default async function EditProductPage({
     );
   }
 
-  return <ProductForm initial={product} />;
+  return <ProductForm initial={product} categories={categories} />;
 }

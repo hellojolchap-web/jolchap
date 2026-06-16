@@ -8,12 +8,12 @@ import { Menu, Search, ShoppingBag } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { MobileNav } from "./MobileNav";
 import { SearchOverlay } from "./SearchOverlay";
-import { mainNav } from "@/config/site";
 import { useCart, cartCount } from "@/lib/store/cart";
 import { useSettings } from "@/components/providers/SettingsProvider";
+import type { Category, NavGroup } from "@/types";
 import { cn } from "@/lib/utils";
 
-export function Header() {
+export function Header({ categories }: { categories: Category[] }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -25,6 +25,12 @@ export function Header() {
   const count = cartCount(items);
   const { brand } = useSettings();
 
+  const nav: NavGroup[] = [
+    ...categories.map((c) => ({ label: c.name, href: `/category/${c.slug}` })),
+    { label: "Blog", href: "/blog" },
+    { label: "Offers", href: "/shop?sale=true" },
+  ];
+
   useEffect(() => setMounted(true), []);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -33,7 +39,7 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const activeGroup = mainNav.find((g) => g.label === active && g.columns?.length);
+  const activeGroup = nav.find((g) => g.label === active && g.columns?.length);
 
   return (
     <>
@@ -63,7 +69,7 @@ export function Header() {
 
           {/* desktop nav */}
           <nav className="hidden items-center gap-1 lg:flex">
-            {mainNav.map((group) => (
+            {nav.map((group) => (
               <Link
                 key={group.label}
                 href={group.href}
@@ -181,7 +187,7 @@ export function Header() {
         </AnimatePresence>
       </header>
 
-      <MobileNav open={mobileOpen} onClose={() => setMobileOpen(false)} />
+      <MobileNav open={mobileOpen} onClose={() => setMobileOpen(false)} categories={categories} />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );

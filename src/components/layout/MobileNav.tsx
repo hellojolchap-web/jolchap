@@ -6,17 +6,27 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, X, Phone, Mail } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
-import { mainNav, siteConfig } from "@/config/site";
+import { useSettings } from "@/components/providers/SettingsProvider";
+import type { Category, NavGroup } from "@/types";
 import { cn } from "@/lib/utils";
 
 export function MobileNav({
   open,
   onClose,
+  categories,
 }: {
   open: boolean;
   onClose: () => void;
+  categories: Category[];
 }) {
   const [expanded, setExpanded] = useState<string | null>(null);
+  const { contact, brand } = useSettings();
+
+  const nav: NavGroup[] = [
+    ...categories.map((c) => ({ label: c.name, href: `/category/${c.slug}` })),
+    { label: "Blog", href: "/blog" },
+    { label: "Offers", href: "/shop?sale=true" },
+  ];
 
   return (
     <AnimatePresence>
@@ -41,7 +51,7 @@ export function MobileNav({
           >
             <div className="flex items-center justify-between border-b border-onyx-100 px-5 py-4">
               <Link href="/" onClick={onClose}>
-                <Logo withTagline />
+                <Logo withTagline name={brand.name} logoUrl={brand.logoUrl || undefined} />
               </Link>
               <button
                 onClick={onClose}
@@ -53,7 +63,7 @@ export function MobileNav({
             </div>
 
             <nav className="flex-1 overflow-y-auto px-3 py-4">
-              {mainNav.map((group) => {
+              {nav.map((group) => {
                 const hasChildren = !!group.columns?.length;
                 const isOpen = expanded === group.label;
                 return (
@@ -73,10 +83,7 @@ export function MobileNav({
                           className="grid h-10 w-10 place-items-center text-onyx-500"
                         >
                           <ChevronDown
-                            className={cn(
-                              "h-5 w-5 transition-transform",
-                              isOpen && "rotate-180"
-                            )}
+                            className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")}
                           />
                         </button>
                       )}
@@ -116,18 +123,18 @@ export function MobileNav({
               </Button>
               <div className="flex flex-col gap-2 text-sm text-onyx-500">
                 <a
-                  href={`tel:${siteConfig.contact.phone.replace(/[^\d+]/g, "")}`}
+                  href={`tel:${contact.phone.replace(/[^\d+]/g, "")}`}
                   className="flex items-center gap-2 hover:text-ember-600"
                 >
                   <Phone className="h-4 w-4 text-ember-500" />
-                  {siteConfig.contact.phone}
+                  {contact.phone}
                 </a>
                 <a
-                  href={`mailto:${siteConfig.contact.email}`}
+                  href={`mailto:${contact.email}`}
                   className="flex items-center gap-2 hover:text-ember-600"
                 >
                   <Mail className="h-4 w-4 text-ember-500" />
-                  {siteConfig.contact.email}
+                  {contact.email}
                 </a>
               </div>
             </div>

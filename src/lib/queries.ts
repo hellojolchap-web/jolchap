@@ -132,6 +132,30 @@ export async function getSettings(): Promise<ResolvedSettings> {
   return readSettings();
 }
 
+/* Cached, cookie-free category list for the header/footer nav (runs in the root
+   layout, so must stay static-friendly). Busted on category edits via the
+   "categories" tag. */
+const readNavCategories = unstable_cache(
+  async (): Promise<Category[]> => {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return localCategories;
+    try {
+      const db = createAnonClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      const { data } = await db.from("categories").select("*").order("sort");
+      return data && data.length ? data.map(mapCategory) : localCategories;
+    } catch {
+      return localCategories;
+    }
+  },
+  ["nav-categories-v1"],
+  { tags: ["categories"], revalidate: 3600 }
+);
+
+export async function getNavCategories(): Promise<Category[]> {
+  return readNavCategories();
+}
+
 /* ── Categories ── */
 export async function getCategories(): Promise<Category[]> {
   const remote = await trySupabase(async (db) => {

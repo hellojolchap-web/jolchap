@@ -7,7 +7,7 @@ import { ArrowLeft, Loader2, Save, Trash2 } from "lucide-react";
 import slugify from "slugify";
 import { toast } from "sonner";
 
-import type { Product } from "@/types";
+import type { Product, Category } from "@/types";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import {
   createProduct,
@@ -28,17 +28,8 @@ import { ImageUploader } from "./ImageUploader";
 import { RichTextField } from "./RichTextField";
 import { NotConfiguredNotice } from "./AdminUI";
 import { useConfirm } from "@/components/providers/ConfirmProvider";
+import { useSettings } from "@/components/providers/SettingsProvider";
 import { cn } from "@/lib/utils";
-
-/** The six storefront categories (slug + display name). */
-const CATEGORIES: { slug: string; name: string }[] = [
-  { slug: "seals-stamps", name: "Seals & Stamps" },
-  { slug: "apparel", name: "Custom Apparel" },
-  { slug: "drinkware", name: "Mugs & Bottles" },
-  { slug: "bags", name: "Bags" },
-  { slug: "gifts", name: "Personalised Gifts" },
-  { slug: "stationery", name: "Business & Stationery" },
-];
 
 type Mode = "create" | "edit";
 
@@ -67,13 +58,13 @@ interface State {
   isBestseller: boolean;
 }
 
-function initialState(initial?: Product): State {
+function initialState(initial: Product | undefined, defaultCatSlug: string): State {
   return {
     id: initial?.id ?? "",
     slug: initial?.slug ?? "",
     slugTouched: Boolean(initial?.slug),
     name: initial?.name ?? "",
-    categorySlug: initial?.categorySlug ?? CATEGORIES[0].slug,
+    categorySlug: initial?.categorySlug ?? defaultCatSlug,
     price: initial ? String(initial.price) : "",
     compareAtPrice: initial?.compareAtPrice != null ? String(initial.compareAtPrice) : "",
     currency: initial?.currency ?? "BDT",
@@ -101,15 +92,25 @@ function initialState(initial?: Product): State {
 const commaToArray = (s: string) =>
   s.split(",").map((v) => v.trim()).filter(Boolean);
 
-export function ProductForm({ initial }: { initial?: Product }) {
+export function ProductForm({
+  initial,
+  categories,
+}: {
+  initial?: Product;
+  categories: Category[];
+}) {
   const router = useRouter();
   const mode: Mode = initial ? "edit" : "create";
   const configured = isSupabaseConfigured();
+  const { badges } = useSettings();
 
-  const [s, setS] = useState<State>(() => initialState(initial));
+  const [s, setS] = useState<State>(() => initialState(initial, categories[0]?.slug ?? ""));
   const [pending, startTransition] = useTransition();
   const [deleting, setDeleting] = useState(false);
   const confirm = useConfirm();
+
+  // Badge options come from settings; keep the product's current badge available.
+  const badgeOptions = Array.from(new Set([...badges, s.badge].filter(Boolean)));
 
   const set = <K extends keyof State>(key: K, value: State[K]) =>
     setS((prev) => ({ ...prev, [key]: value }));
@@ -133,13 +134,13 @@ export function ProductForm({ initial }: { initial?: Product }) {
 
   function buildInput(): ProductInput {
     const category =
-      CATEGORIES.find((c) => c.slug === s.categorySlug) ?? CATEGORIES[0];
+      categories.find((c) => c.slug === s.categorySlug) ?? categories[0];
     return {
       id: s.id || undefined,
       slug: effectiveSlug,
       name: s.name.trim(),
-      categorySlug: category.slug,
-      categoryName: category.name,
+      categorySlug: category?.slug ?? s.categorySlug,
+      categoryName: category?.name ?? "",
       price: Number(s.price),
       compareAtPrice: s.compareAtPrice ? Number(s.compareAtPrice) : null,
       currency: s.currency || "BDT",
@@ -307,21 +308,27 @@ export function ProductForm({ initial }: { initial?: Product }) {
                   onChange={(e) => set("categorySlug", e.target.value)}
                   className={cn(fieldInput, "appearance-none")}
                 >
-                  {CATEGORIES.map((c) => (
+                  {categories.map((c) => (
                     <option key={c.slug} value={c.slug}>
                       {c.name}
                     </option>
                   ))}
                 </select>
               </Field>
-              <Field label="Badge" htmlFor="badge" hint="Optional ribbon">
-                <input
+              <Field label="Badge" htmlFor="badge" hint="Manage the list in Settings">
+                <select
                   id="badge"
                   value={s.badge}
                   onChange={(e) => set("badge", e.target.value)}
-                  placeholder="Bestseller"
-                  className={fieldInput}
-                />
+                  className={cn(fieldInput, "appearance-none")}
+                >
+                  <option value="">No badge</option>
+                  {badgeOptions.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
               </Field>
             </div>
 
