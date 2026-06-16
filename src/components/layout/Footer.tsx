@@ -3,6 +3,7 @@ import { Instagram, Facebook, Youtube, Twitter, MapPin, Phone, Mail, Clock } fro
 import { Logo } from "@/components/brand/Logo";
 import { NewsletterForm } from "./NewsletterForm";
 import { footerNav, siteConfig } from "@/config/site";
+import type { ResolvedSettings } from "@/lib/settings";
 
 function TikTok({ className }: { className?: string }) {
   return (
@@ -12,13 +13,14 @@ function TikTok({ className }: { className?: string }) {
   );
 }
 
-export function Footer() {
+export function Footer({ settings }: { settings: ResolvedSettings }) {
+  const { brand, contact, socials: social } = settings;
   const socials = [
-    { href: siteConfig.socials.instagram, label: "Instagram", Icon: Instagram },
-    { href: siteConfig.socials.facebook, label: "Facebook", Icon: Facebook },
-    { href: siteConfig.socials.youtube, label: "YouTube", Icon: Youtube },
-    { href: siteConfig.socials.tiktok, label: "TikTok", Icon: TikTok },
-    { href: siteConfig.socials.x, label: "X", Icon: Twitter },
+    { href: social.instagram, label: "Instagram", Icon: Instagram },
+    { href: social.facebook, label: "Facebook", Icon: Facebook },
+    { href: social.youtube, label: "YouTube", Icon: Youtube },
+    { href: social.tiktok, label: "TikTok", Icon: TikTok },
+    { href: social.x, label: "X", Icon: Twitter },
   ];
 
   return (
@@ -31,7 +33,7 @@ export function Footer() {
         <div className="grid gap-8 border-b border-white/10 py-14 lg:grid-cols-2 lg:items-center lg:py-16">
           <div>
             <h3 className="text-balance text-3xl font-extrabold leading-tight sm:text-4xl">
-              Join the <span className="text-ember-500">Jolchap</span> inner circle
+              Join the <span className="text-ember-500">{brand.name}</span> inner circle
             </h3>
             <p className="mt-3 max-w-md text-white/60">
               New product drops, design inspiration, gifting ideas, and 10% off your
@@ -53,31 +55,31 @@ export function Footer() {
         {/* main grid */}
         <div className="grid gap-10 py-14 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <Logo tone="light" withTagline />
+            <Logo tone="light" withTagline name={brand.name} logoUrl={brand.logoUrl || undefined} />
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/55">
-              {siteConfig.description}
+              {brand.description}
             </p>
             <ul className="mt-6 space-y-2.5 text-sm text-white/60">
               <li className="flex items-start gap-2.5">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-ember-500" />
-                {siteConfig.contact.address.line1}, {siteConfig.contact.address.city},{" "}
-                {siteConfig.contact.address.region} {siteConfig.contact.address.postcode}
+                {contact.address.line1}, {contact.address.city},{" "}
+                {contact.address.region} {contact.address.postcode}
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="h-4 w-4 shrink-0 text-ember-500" />
-                <a href={`tel:${siteConfig.contact.phone.replace(/[^\d+]/g, "")}`} className="hover:text-white">
-                  {siteConfig.contact.phone}
+                <a href={`tel:${contact.phone.replace(/[^\d+]/g, "")}`} className="hover:text-white">
+                  {contact.phone}
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="h-4 w-4 shrink-0 text-ember-500" />
-                <a href={`mailto:${siteConfig.contact.email}`} className="hover:text-white">
-                  {siteConfig.contact.email}
+                <a href={`mailto:${contact.email}`} className="hover:text-white">
+                  {contact.email}
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
                 <Clock className="h-4 w-4 shrink-0 text-ember-500" />
-                {siteConfig.contact.hours}
+                {contact.hours}
               </li>
             </ul>
           </div>
@@ -106,7 +108,7 @@ export function Footer() {
         {/* bottom bar */}
         <div className="flex flex-col items-center justify-between gap-6 border-t border-white/10 py-7 md:flex-row">
           <p className="order-2 text-sm text-white/40 md:order-1">
-            © {siteConfig.established}–2026 {siteConfig.legalName}. All rights reserved.
+            © {siteConfig.established}–2026 {brand.legalName}. All rights reserved.
           </p>
           <div className="order-1 flex items-center gap-2 md:order-2">
             {socials.map(({ href, label, Icon }) => (

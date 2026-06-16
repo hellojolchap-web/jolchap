@@ -19,6 +19,7 @@ import {
   relatedPosts as localRelatedPosts,
 } from "@/lib/data/blog";
 import { testimonials as localTestimonials } from "@/lib/data/testimonials";
+import { mergeSettings, type PartialSettings, type ResolvedSettings } from "@/lib/settings";
 import type { BlogPost, Category, Product, Testimonial } from "@/types";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -98,6 +99,15 @@ async function trySupabase<T>(
   } catch {
     return null;
   }
+}
+
+/* ── Site settings ── */
+export async function getSettings(): Promise<ResolvedSettings> {
+  const remote = await trySupabase(async (db) => {
+    const { data } = await db.from("site_settings").select("data").eq("id", 1).single();
+    return (data?.data as PartialSettings) ?? null;
+  });
+  return mergeSettings(remote);
 }
 
 /* ── Categories ── */

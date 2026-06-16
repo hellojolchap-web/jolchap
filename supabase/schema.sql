@@ -310,5 +310,40 @@ create policy "media auth delete"
   using (bucket_id = 'media');
 
 -- ============================================================================
+-- SITE SETTINGS
+--   A single JSONB row holding owner-editable store settings (brand, colours,
+--   contact, socials, hero banner, badge list). World-readable; admin-writable.
+-- ============================================================================
+create table if not exists public.site_settings (
+  id         integer primary key default 1,
+  data       jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  constraint site_settings_singleton check (id = 1)
+);
+
+insert into public.site_settings (id, data)
+values (1, '{}'::jsonb)
+on conflict (id) do nothing;
+
+drop trigger if exists set_site_settings_updated_at on public.site_settings;
+create trigger set_site_settings_updated_at
+  before update on public.site_settings
+  for each row execute function public.set_updated_at();
+
+alter table public.site_settings enable row level security;
+
+drop policy if exists "settings public read" on public.site_settings;
+create policy "settings public read"
+  on public.site_settings for select
+  using (true);
+
+drop policy if exists "settings auth write" on public.site_settings;
+create policy "settings auth write"
+  on public.site_settings for all
+  to authenticated
+  using (true)
+  with check (true);
+
+-- ============================================================================
 -- Done. Next: run seed.sql to populate categories, products and blog_posts.
 -- ============================================================================

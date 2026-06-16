@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { siteConfig } from "@/config/site";
+import { useSettings } from "@/components/providers/SettingsProvider";
 import { whatsappLink } from "@/lib/utils";
 
 /**
@@ -13,10 +13,8 @@ export function WhatsAppButton() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  const href = whatsappLink(
-    siteConfig.contact.whatsapp,
-    siteConfig.contact.whatsappMessage
-  );
+  const { contact } = useSettings();
+  const href = whatsappLink(contact.whatsapp, contact.whatsappMessage);
 
   return (
     <a

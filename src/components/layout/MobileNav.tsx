@@ -114,9 +114,6 @@ export function MobileNav({
               <Button href="/shop" className="w-full" onClick={onClose}>
                 Shop all products
               </Button>
-              <Button href="/account" variant="outline" className="w-full" onClick={onClose}>
-                Sign in / Account
-              </Button>
               <div className="flex flex-col gap-2 text-sm text-onyx-500">
                 <a
                   href={`tel:${siteConfig.contact.phone.replace(/[^\d+]/g, "")}`}

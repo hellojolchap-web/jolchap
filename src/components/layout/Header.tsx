@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Search, ShoppingBag, User } from "lucide-react";
+import { Menu, Search, ShoppingBag } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { MobileNav } from "./MobileNav";
 import { SearchOverlay } from "./SearchOverlay";
 import { mainNav } from "@/config/site";
 import { useCart, cartCount } from "@/lib/store/cart";
+import { useSettings } from "@/components/providers/SettingsProvider";
 import { cn } from "@/lib/utils";
 
 export function Header() {
@@ -22,6 +23,7 @@ export function Header() {
   const items = useCart((s) => s.items);
   const openCart = useCart((s) => s.open);
   const count = cartCount(items);
+  const { brand } = useSettings();
 
   useEffect(() => setMounted(true), []);
   useEffect(() => {
@@ -54,8 +56,8 @@ export function Header() {
             >
               <Menu className="h-5 w-5" />
             </button>
-            <Link href="/" aria-label="Jolchap home">
-              <Logo animated />
+            <Link href="/" aria-label={`${brand.name} home`}>
+              <Logo animated name={brand.name} logoUrl={brand.logoUrl || undefined} />
             </Link>
           </div>
 
@@ -91,13 +93,6 @@ export function Header() {
             >
               <Search className="h-[19px] w-[19px]" />
             </button>
-            <Link
-              href="/account"
-              aria-label="Your account"
-              className="hidden h-10 w-10 place-items-center rounded-full text-onyx-900 transition-colors hover:bg-onyx-100 sm:grid"
-            >
-              <User className="h-[19px] w-[19px]" />
-            </Link>
             <button
               onClick={openCart}
               aria-label="Open cart"

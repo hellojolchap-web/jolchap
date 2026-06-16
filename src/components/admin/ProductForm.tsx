@@ -27,6 +27,7 @@ import {
 import { ImageUploader } from "./ImageUploader";
 import { RichTextField } from "./RichTextField";
 import { NotConfiguredNotice } from "./AdminUI";
+import { useConfirm } from "@/components/providers/ConfirmProvider";
 import { cn } from "@/lib/utils";
 
 /** The six storefront categories (slug + display name). */
@@ -108,6 +109,7 @@ export function ProductForm({ initial }: { initial?: Product }) {
   const [s, setS] = useState<State>(() => initialState(initial));
   const [pending, startTransition] = useTransition();
   const [deleting, setDeleting] = useState(false);
+  const confirm = useConfirm();
 
   const set = <K extends keyof State>(key: K, value: State[K]) =>
     setS((prev) => ({ ...prev, [key]: value }));
@@ -194,7 +196,13 @@ export function ProductForm({ initial }: { initial?: Product }) {
       toast.error("Connect Supabase to delete.");
       return;
     }
-    if (!window.confirm(`Delete "${s.name}"? This cannot be undone.`)) return;
+    const ok = await confirm({
+      title: `Delete "${s.name}"?`,
+      message: "This permanently removes the product from your catalogue. This can't be undone.",
+      confirmText: "Delete product",
+      tone: "danger",
+    });
+    if (!ok) return;
 
     setDeleting(true);
     const result = await deleteProduct(s.id);

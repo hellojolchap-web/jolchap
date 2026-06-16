@@ -79,7 +79,7 @@ export async function middleware(request: NextRequest) {
   if (isLoginRoute) {
     if (isAuthenticated) {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = isAdmin(userEmail) ? "/admin" : "/account";
+      redirectUrl.pathname = isAdmin(userEmail) ? "/admin" : "/";
       redirectUrl.search = "";
       return NextResponse.redirect(redirectUrl);
     }
@@ -94,11 +94,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Restrict the admin to the owner(s); a signed-in customer who isn't on the
-  // allowlist is sent to their own account page instead.
+  // Restrict the admin to the owner(s); anyone else signed in goes to the store.
   if (!isAdmin(userEmail)) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/account";
+    redirectUrl.pathname = "/";
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }

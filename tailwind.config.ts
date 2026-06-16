@@ -24,19 +24,21 @@ const config: Config = {
     },
     extend: {
       colors: {
-        // ── Brand colour #1 — JOL TEAL (primary) ───────────────────────
+        // ── Brand colour #1 — ACCENT (primary) ──────────────────────────
+        // Driven by CSS variables so the admin can re-theme the whole site by
+        // picking one accent colour (see src/lib/theme.ts + globals.css).
         ember: {
-          50: "#ECFBFA",
-          100: "#CFF3F2",
-          200: "#A2E7E6",
-          300: "#67D2D2",
-          400: "#2FB4B6",
-          500: "#0E8388", // ◀ primary brand teal (from logo)
-          600: "#0A6A6F",
-          700: "#0D565A",
-          800: "#114448",
-          900: "#123A3D",
-          950: "#04211F",
+          50: "rgb(var(--ember-50) / <alpha-value>)",
+          100: "rgb(var(--ember-100) / <alpha-value>)",
+          200: "rgb(var(--ember-200) / <alpha-value>)",
+          300: "rgb(var(--ember-300) / <alpha-value>)",
+          400: "rgb(var(--ember-400) / <alpha-value>)",
+          500: "rgb(var(--ember-500) / <alpha-value>)",
+          600: "rgb(var(--ember-600) / <alpha-value>)",
+          700: "rgb(var(--ember-700) / <alpha-value>)",
+          800: "rgb(var(--ember-800) / <alpha-value>)",
+          900: "rgb(var(--ember-900) / <alpha-value>)",
+          950: "rgb(var(--ember-950) / <alpha-value>)",
         },
         // ── Brand colour #2 — INK (near-black) ──────────────────────────
         onyx: {
@@ -84,7 +86,8 @@ const config: Config = {
         card: "0 1px 0 0 rgba(12,20,27,0.04), 0 18px 40px -28px rgba(12,20,27,0.32)",
       },
       backgroundImage: {
-        "ember-grad": "linear-gradient(135deg,#2FB4B6 0%,#0E8388 45%,#0D565A 100%)",
+        "ember-grad":
+          "linear-gradient(135deg, rgb(var(--ember-400)) 0%, rgb(var(--ember-500)) 45%, rgb(var(--ember-700)) 100%)",
         "onyx-grad": "linear-gradient(160deg,#222C35 0%,#0C141B 100%)",
         "grid-faint":
           "linear-gradient(to right, rgba(12,20,27,0.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(12,20,27,0.045) 1px, transparent 1px)",

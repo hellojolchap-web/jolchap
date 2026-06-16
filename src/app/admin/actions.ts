@@ -5,6 +5,7 @@ import slugify from "slugify";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseAdminConfigured } from "@/lib/supabase/config";
+import type { PartialSettings } from "@/lib/settings";
 import type { Author, ProductSpec, ProductVariantColor } from "@/types";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -157,6 +158,24 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
     return { ok: true, id };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "Failed to delete product." };
+  }
+}
+
+/* ── Site settings ────────────────────────────────────────────────────────── */
+
+export async function updateSettings(input: PartialSettings): Promise<ActionResult> {
+  if (!isSupabaseAdminConfigured()) return { ok: false, error: NOT_CONFIGURED };
+  try {
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from("site_settings")
+      .upsert({ id: 1, data: input }, { onConflict: "id" });
+    if (error) return { ok: false, error: error.message };
+    // Settings feed the root layout — revalidate the whole site.
+    revalidatePath("/", "layout");
+    return { ok: true, id: "settings" };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to save settings." };
   }
 }
 
