@@ -41,7 +41,11 @@ export interface ProductInput {
   tags: string[];
   inStock: boolean;
   stockCount: number;
-  deliveryCharge: number;
+  freeDelivery: boolean;
+  promoCode: string;
+  promoDiscount: number;
+  promoType: "flat" | "percent";
+  promoExpiry: string;
   isFeatured: boolean;
   isNew: boolean;
   isBestseller: boolean;
@@ -104,7 +108,11 @@ function productRow(input: ProductInput, id: string) {
     tags: input.tags,
     in_stock: input.inStock,
     stock_count: input.stockCount,
-    delivery_charge: input.deliveryCharge,
+    free_delivery: input.freeDelivery,
+    promo_code: input.promoCode,
+    promo_discount: input.promoDiscount,
+    promo_type: input.promoType,
+    promo_expiry: input.promoExpiry || null,
     is_featured: input.isFeatured,
     is_new: input.isNew,
     is_bestseller: input.isBestseller,

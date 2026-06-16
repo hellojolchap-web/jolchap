@@ -14,7 +14,6 @@ import {
   FormSection,
   Toggle,
   StringListEditor,
-  PairListEditor,
   fieldInput,
   fieldArea,
 } from "@/components/admin/FormKit";
@@ -63,6 +62,8 @@ export function SettingsForm({ initial }: { initial: ResolvedSettings }) {
     setS((p) => ({ ...p, socials: { ...p.socials, [k]: v } }));
   const setHero = <K extends keyof ResolvedSettings["hero"]>(k: K, v: ResolvedSettings["hero"][K]) =>
     setS((p) => ({ ...p, hero: { ...p.hero, [k]: v } }));
+  const setDelivery = (k: keyof ResolvedSettings["delivery"], v: string) =>
+    setS((p) => ({ ...p, delivery: { ...p.delivery, [k]: Number(v) || 0 } }));
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -275,25 +276,33 @@ export function SettingsForm({ initial }: { initial: ResolvedSettings }) {
         />
       </FormSection>
 
-      {/* Promo codes */}
+      {/* Delivery charges */}
       <FormSection
-        title="Promo codes"
-        description="Set a code and a flat ৳ discount. Customers type the code at checkout to take that amount off their order total."
+        title="Delivery charges"
+        description="Charged once per order. A product marked “Free delivery” skips it. The customer picks their zone (inside / outside Dhaka) in the cart."
       >
-        <PairListEditor
-          items={s.promos.map((p) => ({ a: p.code, b: String(p.discount) }))}
-          onChange={(items) =>
-            setS((prev) => ({
-              ...prev,
-              promos: items
-                .filter((x) => x.a.trim())
-                .map((x) => ({ code: x.a.trim().toUpperCase(), discount: Number(x.b) || 0 })),
-            }))
-          }
-          aPlaceholder="SAVE100"
-          bPlaceholder="100"
-          addLabel="Add promo code"
-        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Inside Dhaka (৳)" htmlFor="insideDhaka">
+            <input
+              id="insideDhaka"
+              inputMode="decimal"
+              value={String(s.delivery.insideDhaka)}
+              onChange={(e) => setDelivery("insideDhaka", e.target.value)}
+              placeholder="60"
+              className={fieldInput}
+            />
+          </Field>
+          <Field label="Outside Dhaka (৳)" htmlFor="outsideDhaka">
+            <input
+              id="outsideDhaka"
+              inputMode="decimal"
+              value={String(s.delivery.outsideDhaka)}
+              onChange={(e) => setDelivery("outsideDhaka", e.target.value)}
+              placeholder="120"
+              className={fieldInput}
+            />
+          </Field>
+        </div>
       </FormSection>
     </form>
   );

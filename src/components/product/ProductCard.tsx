@@ -34,7 +34,11 @@ export function ProductCard({
       size: product.sizes[0] ?? null,
       color: product.colors[0]?.name ?? null,
       quantity: 1,
-      deliveryCharge: product.deliveryCharge ?? 0,
+      freeDelivery: product.freeDelivery ?? false,
+      promoCode: product.promoCode ?? "",
+      promoDiscount: product.promoDiscount ?? 0,
+      promoType: product.promoType ?? "flat",
+      promoExpiry: product.promoExpiry ?? "",
     });
     setAdded(true);
     toast.success(`${product.name} added to bag`);

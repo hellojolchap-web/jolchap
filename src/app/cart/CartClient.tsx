@@ -19,21 +19,31 @@ import { toast } from "sonner";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Container } from "@/components/ui/Container";
 import { CheckoutForm } from "@/components/commerce/CheckoutForm";
-import { useCart, lineKey, cartSubtotal, cartCount, cartDelivery } from "@/lib/store/cart";
+import {
+  useCart,
+  lineKey,
+  cartSubtotal,
+  cartCount,
+  cartHasPaidDelivery,
+  cartPromoDiscount,
+} from "@/lib/store/cart";
 import { useSettings } from "@/components/providers/SettingsProvider";
-import { findPromo } from "@/lib/settings";
 import { cn, formatPrice } from "@/lib/utils";
 
 export default function CartClient() {
-  const { items, remove, setQty, promoCode, setPromoCode } = useCart();
-  const { promos } = useSettings();
+  const { items, remove, setQty, promoCode, setPromoCode, deliveryZone, setDeliveryZone } =
+    useCart();
+  const { delivery: rates } = useSettings();
   const subtotal = cartSubtotal(items);
   const count = cartCount(items);
   const currency = items[0]?.currency ?? "BDT";
 
-  const delivery = cartDelivery(items);
-  const appliedPromo = findPromo(promoCode, promos);
-  const discount = appliedPromo ? Math.min(appliedPromo.discount, subtotal) : 0;
+  const delivery = cartHasPaidDelivery(items)
+    ? deliveryZone === "outside"
+      ? rates.outsideDhaka
+      : rates.insideDhaka
+    : 0;
+  const { discount, matched } = cartPromoDiscount(items, promoCode);
   const total = Math.max(0, subtotal + delivery - discount);
 
   const [promo, setPromo] = useState(promoCode);
@@ -41,14 +51,14 @@ export default function CartClient() {
   const applyPromo = () => {
     const code = promo.trim();
     if (!code) return;
-    const match = findPromo(code, promos);
-    if (!match) {
+    const res = cartPromoDiscount(items, code);
+    if (!res.matched) {
       setPromoCode("");
-      toast.error("That promo code isn't valid.");
+      toast.error("This code doesn't apply to anything in your bag.");
       return;
     }
-    setPromoCode(match.code);
-    toast.success(`Code applied — ${formatPrice(match.discount, currency)} off!`);
+    setPromoCode(code.toUpperCase());
+    toast.success(`Promo applied — ${formatPrice(res.discount, currency)} off!`);
   };
 
   const clearPromo = () => {
@@ -267,10 +277,10 @@ export default function CartClient() {
                     Apply
                   </button>
                 </div>
-                {appliedPromo && (
+                {matched && (
                   <p className="mt-2 flex items-center justify-between gap-2 text-xs">
                     <span className="font-semibold text-ember-600">
-                      &ldquo;{appliedPromo.code}&rdquo; applied — {formatPrice(discount, currency)} off
+                      &ldquo;{promoCode}&rdquo; applied — {formatPrice(discount, currency)} off
                     </span>
                     <button
                       onClick={clearPromo}
@@ -280,6 +290,30 @@ export default function CartClient() {
                     </button>
                   </p>
                 )}
+              </div>
+
+              {/* delivery zone */}
+              <div className="mt-5">
+                <label className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-onyx-400">
+                  <Truck className="h-3.5 w-3.5" />
+                  Delivery zone
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(["inside", "outside"] as const).map((z) => (
+                    <button
+                      key={z}
+                      onClick={() => setDeliveryZone(z)}
+                      className={cn(
+                        "rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors",
+                        deliveryZone === z
+                          ? "border-ember-500 bg-ember-50 text-ember-700"
+                          : "border-onyx-200 text-onyx-600 hover:border-onyx-300"
+                      )}
+                    >
+                      {z === "inside" ? "Inside Dhaka" : "Outside Dhaka"}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="my-5 hairline" />
@@ -294,7 +328,7 @@ export default function CartClient() {
                   )}
                 </Row>
                 {discount > 0 && (
-                  <Row label={`Discount (${appliedPromo?.code ?? ""})`}>
+                  <Row label={`Discount (${promoCode})`}>
                     <span className="font-bold text-ember-600">
                       − {formatPrice(discount, currency)}
                     </span>

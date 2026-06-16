@@ -52,7 +52,11 @@ interface State {
   tags: string;
   images: string[];
   stockCount: string;
-  deliveryCharge: string;
+  freeDelivery: boolean;
+  promoCode: string;
+  promoDiscount: string;
+  promoType: "flat" | "percent";
+  promoExpiry: string;
   inStock: boolean;
   isFeatured: boolean;
   isNew: boolean;
@@ -83,7 +87,11 @@ function initialState(initial: Product | undefined, defaultCatSlug: string): Sta
     tags: initial?.tags.join(", ") ?? "",
     images: initial?.images ?? [],
     stockCount: initial ? String(initial.stockCount) : "0",
-    deliveryCharge: initial?.deliveryCharge != null ? String(initial.deliveryCharge) : "0",
+    freeDelivery: initial?.freeDelivery ?? false,
+    promoCode: initial?.promoCode ?? "",
+    promoDiscount: initial?.promoDiscount ? String(initial.promoDiscount) : "",
+    promoType: initial?.promoType ?? "flat",
+    promoExpiry: initial?.promoExpiry ?? "",
     inStock: initial?.inStock ?? true,
     isFeatured: initial?.isFeatured ?? false,
     isNew: initial?.isNew ?? false,
@@ -160,7 +168,11 @@ export function ProductForm({
       tags: commaToArray(s.tags),
       images: s.images,
       stockCount: Number(s.stockCount) || 0,
-      deliveryCharge: Number(s.deliveryCharge) || 0,
+      freeDelivery: s.freeDelivery,
+      promoCode: s.promoCode.trim().toUpperCase(),
+      promoDiscount: Number(s.promoDiscount) || 0,
+      promoType: s.promoType,
+      promoExpiry: s.promoExpiry,
       inStock: s.inStock,
       isFeatured: s.isFeatured,
       isNew: s.isNew,
@@ -409,28 +421,16 @@ export function ProductForm({
                 />
               </Field>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Currency" htmlFor="currency">
-                <input
-                  id="currency"
-                  value={s.currency}
-                  onChange={(e) => set("currency", e.target.value.toUpperCase())}
-                  placeholder="BDT"
-                  maxLength={3}
-                  className={cn(fieldInput, "uppercase")}
-                />
-              </Field>
-              <Field label="Delivery charge" htmlFor="delivery" hint="0 = free">
-                <input
-                  id="delivery"
-                  inputMode="decimal"
-                  value={s.deliveryCharge}
-                  onChange={(e) => set("deliveryCharge", e.target.value)}
-                  placeholder="0"
-                  className={fieldInput}
-                />
-              </Field>
-            </div>
+            <Field label="Currency" htmlFor="currency">
+              <input
+                id="currency"
+                value={s.currency}
+                onChange={(e) => set("currency", e.target.value.toUpperCase())}
+                placeholder="BDT"
+                maxLength={3}
+                className={cn(fieldInput, "uppercase")}
+              />
+            </Field>
           </FormSection>
 
           <FormSection title="Inventory">
@@ -450,6 +450,59 @@ export function ProductForm({
               label="In stock"
               description="Available to purchase on the storefront"
             />
+            <Toggle
+              checked={s.freeDelivery}
+              onChange={(v) => set("freeDelivery", v)}
+              label="Free delivery"
+              description="No delivery charge for this product (overrides the zone charge)"
+            />
+          </FormSection>
+
+          <FormSection
+            title="Promo / offer"
+            description="Optional. Customers enter this code at checkout to discount THIS product only."
+          >
+            <Field label="Promo code" htmlFor="promoCode" hint="e.g. EID50 — leave empty for no offer">
+              <input
+                id="promoCode"
+                value={s.promoCode}
+                onChange={(e) => set("promoCode", e.target.value.toUpperCase())}
+                placeholder="EID50"
+                className={cn(fieldInput, "uppercase")}
+              />
+            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Discount" htmlFor="promoDiscount">
+                <input
+                  id="promoDiscount"
+                  inputMode="decimal"
+                  value={s.promoDiscount}
+                  onChange={(e) => set("promoDiscount", e.target.value)}
+                  placeholder="100"
+                  className={fieldInput}
+                />
+              </Field>
+              <Field label="Type" htmlFor="promoType">
+                <select
+                  id="promoType"
+                  value={s.promoType}
+                  onChange={(e) => set("promoType", e.target.value as "flat" | "percent")}
+                  className={cn(fieldInput, "appearance-none")}
+                >
+                  <option value="flat">৳ flat off</option>
+                  <option value="percent">% percent off</option>
+                </select>
+              </Field>
+            </div>
+            <Field label="Expiry date" htmlFor="promoExpiry" hint="Leave empty = never expires">
+              <input
+                id="promoExpiry"
+                type="date"
+                value={s.promoExpiry}
+                onChange={(e) => set("promoExpiry", e.target.value)}
+                className={fieldInput}
+              />
+            </Field>
           </FormSection>
 
           <FormSection title="Variants">

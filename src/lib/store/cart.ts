@@ -14,9 +14,12 @@ interface CartState {
   open: () => void;
   close: () => void;
   toggle: () => void;
-  /** Applied promo code (validated against settings at checkout). */
+  /** Applied promo code (validated against in-cart products at checkout). */
   promoCode: string;
   setPromoCode: (code: string) => void;
+  /** Delivery zone — drives which settings charge applies. */
+  deliveryZone: "inside" | "outside";
+  setDeliveryZone: (zone: "inside" | "outside") => void;
 }
 
 /** Unique line key combining product + chosen variant. */
@@ -62,6 +65,8 @@ export const useCart = create<CartState>()(
       toggle: () => set((s) => ({ isOpen: !s.isOpen })),
       promoCode: "",
       setPromoCode: (code) => set({ promoCode: code }),
+      deliveryZone: "inside",
+      setDeliveryZone: (zone) => set({ deliveryZone: zone }),
     }),
     { name: "jolchap-cart" }
   )
@@ -74,6 +79,30 @@ export const cartCount = (items: CartItem[]) =>
 export const cartSubtotal = (items: CartItem[]) =>
   items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-/** Delivery = the highest per-product delivery charge in the bag (0 = all free). */
-export const cartDelivery = (items: CartItem[]) =>
-  items.length ? Math.max(0, ...items.map((i) => i.deliveryCharge || 0)) : 0;
+/** True when at least one item in the bag is NOT free-delivery. */
+export const cartHasPaidDelivery = (items: CartItem[]) =>
+  items.some((i) => !i.freeDelivery);
+
+/** Per-product promo: sum the discount across items whose code matches `code`
+    (and isn't past its expiry). Returns the discount + whether anything matched. */
+export function cartPromoDiscount(items: CartItem[], code: string) {
+  const c = code.trim().toUpperCase();
+  if (!c) return { discount: 0, matched: false };
+  const now = new Date();
+  let discount = 0;
+  let matched = false;
+  for (const i of items) {
+    if (!i.promoCode || i.promoCode.trim().toUpperCase() !== c) continue;
+    if (i.promoExpiry) {
+      const exp = new Date(`${i.promoExpiry}T23:59:59`);
+      if (!Number.isNaN(exp.getTime()) && exp < now) continue; // expired
+    }
+    matched = true;
+    const line = i.price * i.quantity;
+    discount +=
+      i.promoType === "percent"
+        ? (line * (i.promoDiscount || 0)) / 100
+        : Math.min(i.promoDiscount || 0, line);
+  }
+  return { discount: Math.round(discount), matched };
+}

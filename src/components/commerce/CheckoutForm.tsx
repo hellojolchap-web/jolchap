@@ -13,9 +13,8 @@ import {
   User,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useCart, cartSubtotal, cartDelivery } from "@/lib/store/cart";
+import { useCart, cartSubtotal, cartHasPaidDelivery, cartPromoDiscount } from "@/lib/store/cart";
 import { useSettings } from "@/components/providers/SettingsProvider";
-import { findPromo } from "@/lib/settings";
 import { cn, formatPrice } from "@/lib/utils";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -56,14 +55,17 @@ const EMPTY: Fields = {
 type Errors = Partial<Record<keyof Fields, string>>;
 
 export function CheckoutForm() {
-  const { items, clear, promoCode } = useCart();
-  const { promos } = useSettings();
+  const { items, clear, promoCode, deliveryZone } = useCart();
+  const { delivery: rates } = useSettings();
   const subtotal = cartSubtotal(items);
   const currency = items[0]?.currency ?? "BDT";
 
-  const delivery = cartDelivery(items);
-  const appliedPromo = findPromo(promoCode, promos);
-  const discount = appliedPromo ? Math.min(appliedPromo.discount, subtotal) : 0;
+  const delivery = cartHasPaidDelivery(items)
+    ? deliveryZone === "outside"
+      ? rates.outsideDhaka
+      : rates.insideDhaka
+    : 0;
+  const { discount } = cartPromoDiscount(items, promoCode);
   const total = Math.max(0, subtotal + delivery - discount);
 
   const [values, setValues] = useState<Fields>(EMPTY);

@@ -48,8 +48,14 @@ export interface Product {
   sizes: string[];
   inStock: boolean;
   stockCount: number;
-  /** Delivery charge for this product (0 or unset = free delivery). */
-  deliveryCharge?: number;
+  /** When true this product ships free, ignoring the delivery-zone charge. */
+  freeDelivery?: boolean;
+  /** Optional per-product promo. Empty code = no promo. */
+  promoCode?: string;
+  promoDiscount?: number;
+  promoType?: "flat" | "percent";
+  /** ISO date (YYYY-MM-DD); empty = never expires. */
+  promoExpiry?: string;
   isFeatured: boolean;
   isNew: boolean;
   isBestseller: boolean;
@@ -97,8 +103,11 @@ export interface CartItem {
   size: string | null;
   color: string | null;
   quantity: number;
-  /** Delivery charge for this product (0 = free). */
-  deliveryCharge: number;
+  freeDelivery: boolean;
+  promoCode: string;
+  promoDiscount: number;
+  promoType: "flat" | "percent";
+  promoExpiry: string;
 }
 
 export interface NavLink {

@@ -52,7 +52,11 @@ export function ProductPurchase({ product }: { product: Product }) {
     size,
     color,
     quantity: qty,
-    deliveryCharge: product.deliveryCharge ?? 0,
+    freeDelivery: product.freeDelivery ?? false,
+    promoCode: product.promoCode ?? "",
+    promoDiscount: product.promoDiscount ?? 0,
+    promoType: product.promoType ?? "flat",
+    promoExpiry: product.promoExpiry ?? "",
   });
 
   const handleAdd = () => {

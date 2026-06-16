@@ -68,10 +68,10 @@ export interface MenuItem {
   depth: number;
 }
 
-/** A promo / discount code: enter `code` at checkout for a flat `discount` off. */
-export interface PromoCode {
-  code: string;
-  discount: number;
+/** Delivery charges by zone (per order; a product can override with free delivery). */
+export interface DeliverySettings {
+  insideDhaka: number;
+  outsideDhaka: number;
 }
 
 export interface ResolvedSettings {
@@ -83,8 +83,8 @@ export interface ResolvedSettings {
   menu: MenuItem[];
   /** Selectable product ribbon labels, managed from the admin. */
   badges: string[];
-  /** Promo codes — entering `code` at checkout takes `discount` off the total. */
-  promos: PromoCode[];
+  /** Delivery charges by zone (inside / outside Dhaka). */
+  delivery: DeliverySettings;
 }
 
 export type PartialSettings = {
@@ -94,7 +94,7 @@ export type PartialSettings = {
   hero?: Partial<HeroSettings>;
   menu?: MenuItem[];
   badges?: string[];
-  promos?: PromoCode[];
+  delivery?: Partial<DeliverySettings>;
 };
 
 export const DEFAULT_BADGES = ["Bestseller", "Popular", "New", "Hot", "Sale", "Limited"];
@@ -122,7 +122,7 @@ export const DEFAULT_SETTINGS: ResolvedSettings = {
   hero: { images: [], float: true, autoplay: true },
   menu: [],
   badges: DEFAULT_BADGES,
-  promos: [],
+  delivery: { insideDhaka: 60, outsideDhaka: 120 },
 };
 
 const str = (v: unknown, fallback: string): string =>
@@ -181,17 +181,9 @@ export function mergeSettings(p: PartialSettings | null | undefined): ResolvedSe
     badges: Array.isArray(p.badges) && p.badges.length
       ? p.badges.filter((s) => typeof s === "string" && s.trim())
       : d.badges,
-    promos: Array.isArray(p.promos)
-      ? p.promos
-          .filter((x) => x && typeof x.code === "string" && x.code.trim())
-          .map((x) => ({ code: x.code.trim(), discount: Math.max(0, Number(x.discount) || 0) }))
-      : d.promos,
+    delivery: {
+      insideDhaka: Math.max(0, Number(p.delivery?.insideDhaka ?? d.delivery.insideDhaka) || 0),
+      outsideDhaka: Math.max(0, Number(p.delivery?.outsideDhaka ?? d.delivery.outsideDhaka) || 0),
+    },
   };
-}
-
-/** Look up a promo code (case-insensitive). Returns the matched promo or null. */
-export function findPromo(code: string, promos: PromoCode[]): PromoCode | null {
-  const c = code.trim().toUpperCase();
-  if (!c) return null;
-  return promos.find((p) => p.code.trim().toUpperCase() === c) ?? null;
 }
