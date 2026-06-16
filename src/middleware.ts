@@ -23,6 +23,9 @@ const isAdmin = (email: string) =>
  *  • If Supabase env vars are missing we treat the visitor as unauthenticated
  *    and send them to the login page (which renders a "connect Supabase" card).
  *
+ * NOTE: This file lives in `src/` because the app uses a `src` directory — a
+ * root-level middleware.ts is NOT picked up by Next.js in that layout.
+ *
  * The cookie plumbing mirrors the @supabase/ssr middleware pattern so the
  * refreshed session is written back onto the outgoing response.
  */
