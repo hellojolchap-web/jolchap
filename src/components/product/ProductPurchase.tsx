@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { Stars } from "@/components/ui/Stars";
 import { useCart } from "@/lib/store/cart";
+import { useSettings } from "@/components/providers/SettingsProvider";
 import { siteConfig } from "@/config/site";
 import { cn, discountPercent, formatPrice, whatsappLink } from "@/lib/utils";
 import type { Product } from "@/types";
@@ -33,6 +34,8 @@ export function ProductPurchase({ product }: { product: Product }) {
   const router = useRouter();
   const add = useCart((s) => s.add);
   const open = useCart((s) => s.open);
+  const { delivery } = useSettings();
+  const returnDays = product.returnDays ?? 7;
 
   const discount = discountPercent(product.price, product.compareAtPrice);
   const [color, setColor] = useState(product.colors[0]?.name ?? null);
@@ -276,9 +279,15 @@ export function ProductPurchase({ product }: { product: Product }) {
 
       {/* trust row */}
       <div className="mt-7 grid grid-cols-3 gap-2 rounded-2xl bg-onyx-50 p-4 ring-1 ring-onyx-100">
-        <TrustCell icon={<Truck className="h-5 w-5" />} label="Free shipping over $99" />
-        <TrustCell icon={<RotateCcw className="h-5 w-5" />} label="30-day returns" />
-        <TrustCell icon={<ShieldCheck className="h-5 w-5" />} label="Lifetime guarantee" />
+        <TrustCell
+          icon={<Truck className="h-5 w-5" />}
+          label={product.freeDelivery ? "Free delivery" : `Delivery from ৳${delivery.insideDhaka}`}
+        />
+        <TrustCell
+          icon={<RotateCcw className="h-5 w-5" />}
+          label={returnDays > 0 ? `${returnDays}-day returns` : "Made to order"}
+        />
+        <TrustCell icon={<ShieldCheck className="h-5 w-5" />} label="Quality guaranteed" />
       </div>
 
       {/* feature highlights */}
@@ -297,17 +306,20 @@ export function ProductPurchase({ product }: { product: Product }) {
       <div className="mt-7 divide-y divide-onyx-100 border-y border-onyx-100">
         <Accordion title="Shipping & delivery" defaultOpen>
           <p>
-            Free standard shipping on every order over $99 — flat $9.99 below that. Orders
-            placed before 2pm EST ship the same business day, with delivery in 2–5 business
-            days across the contiguous US. Tracking lands in your inbox the moment it leaves
-            the warehouse.
+            {product.freeDelivery
+              ? "This product ships free anywhere in Bangladesh. "
+              : `Delivery is ৳${delivery.insideDhaka} inside Dhaka and ৳${delivery.outsideDhaka} outside Dhaka — choose your zone at checkout. `}
+            Made-to-order items are dispatched within 1–3 working days and reach you in roughly
+            2–5 days across Bangladesh.
           </p>
         </Accordion>
         <Accordion title="Returns & exchanges">
           <p>
-            Not the right fit? Send it back within 30 days for a full refund or a free size
-            exchange — unworn gear in its original packaging, no questions asked. We email a
-            prepaid label and process refunds within three business days of receipt.
+            {returnDays > 0
+              ? `Changed your mind? Return or exchange within ${returnDays} days of delivery — items must be unused and in their original condition. `
+              : "This is a made-to-order item, so it can only be returned if there's a fault. "}
+            Personalised items can be returned only for a print or quality fault, which we&apos;ll
+            reprint free of charge.
           </p>
         </Accordion>
         <Accordion title="Our print guarantee">

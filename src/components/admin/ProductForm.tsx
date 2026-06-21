@@ -53,6 +53,7 @@ interface State {
   images: string[];
   stockCount: string;
   freeDelivery: boolean;
+  returnDays: string;
   promoCode: string;
   promoDiscount: string;
   promoType: "flat" | "percent";
@@ -88,6 +89,7 @@ function initialState(initial: Product | undefined, defaultCatSlug: string): Sta
     images: initial?.images ?? [],
     stockCount: initial ? String(initial.stockCount) : "0",
     freeDelivery: initial?.freeDelivery ?? false,
+    returnDays: initial?.returnDays != null ? String(initial.returnDays) : "7",
     promoCode: initial?.promoCode ?? "",
     promoDiscount: initial?.promoDiscount ? String(initial.promoDiscount) : "",
     promoType: initial?.promoType ?? "flat",
@@ -169,6 +171,7 @@ export function ProductForm({
       images: s.images,
       stockCount: Number(s.stockCount) || 0,
       freeDelivery: s.freeDelivery,
+      returnDays: Number(s.returnDays) || 0,
       promoCode: s.promoCode.trim().toUpperCase(),
       promoDiscount: Number(s.promoDiscount) || 0,
       promoType: s.promoType,
@@ -456,6 +459,16 @@ export function ProductForm({
               label="Free delivery"
               description="No delivery charge for this product (overrides the zone charge)"
             />
+            <Field label="Return window (days)" htmlFor="returnDays" hint="0 = no returns">
+              <input
+                id="returnDays"
+                inputMode="numeric"
+                value={s.returnDays}
+                onChange={(e) => set("returnDays", e.target.value)}
+                placeholder="7"
+                className={fieldInput}
+              />
+            </Field>
           </FormSection>
 
           <FormSection

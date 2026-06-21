@@ -56,6 +56,8 @@ export interface Product {
   promoType?: "flat" | "percent";
   /** ISO date (YYYY-MM-DD); empty = never expires. */
   promoExpiry?: string;
+  /** Return window in days (0 = no returns). */
+  returnDays?: number;
   isFeatured: boolean;
   isNew: boolean;
   isBestseller: boolean;

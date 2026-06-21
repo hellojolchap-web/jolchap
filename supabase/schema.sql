@@ -70,6 +70,7 @@ create table if not exists public.products (
   promo_discount    numeric(10, 2) not null default 0,
   promo_type        text not null default 'flat',
   promo_expiry      date,
+  return_days       integer not null default 7,
   is_featured       boolean not null default false,
   is_new            boolean not null default false,
   is_bestseller     boolean not null default false,

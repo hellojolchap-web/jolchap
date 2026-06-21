@@ -104,8 +104,8 @@ export default function CartClient() {
 
           <div className="mt-14 grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-3">
             <PerkCard icon={<Truck className="h-5 w-5" />} title="Fast delivery" copy="Across Bangladesh" />
-            <PerkCard icon={<RotateCcw className="h-5 w-5" />} title="30-day returns" copy="No-sweat exchanges" />
-            <PerkCard icon={<ShieldCheck className="h-5 w-5" />} title="Lifetime guarantee" copy="On every build" />
+            <PerkCard icon={<RotateCcw className="h-5 w-5" />} title="Easy returns" copy="On eligible items" />
+            <PerkCard icon={<ShieldCheck className="h-5 w-5" />} title="Quality guaranteed" copy="Checked before we ship" />
           </div>
         </Container>
       </div>
@@ -366,7 +366,7 @@ export default function CartClient() {
                   Secure 256-bit encrypted checkout
                 </TrustLi>
                 <TrustLi icon={<RotateCcw className="h-4 w-4 text-ember-500" />}>
-                  30-day no-sweat returns &amp; exchanges
+                  Easy returns &amp; exchanges
                 </TrustLi>
                 <TrustLi icon={<Truck className="h-4 w-4 text-ember-500" />}>
                   Fast delivery across Bangladesh

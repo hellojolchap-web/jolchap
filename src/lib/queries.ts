@@ -62,6 +62,7 @@ function mapProduct(r: Record<string, unknown>): Product {
     promoDiscount: Number(r.promo_discount ?? 0),
     promoType: (r.promo_type as "flat" | "percent") ?? "flat",
     promoExpiry: r.promo_expiry ? String(r.promo_expiry) : "",
+    returnDays: r.return_days != null ? Number(r.return_days) : 7,
     isFeatured: Boolean(r.is_featured),
     isNew: Boolean(r.is_new),
     isBestseller: Boolean(r.is_bestseller),

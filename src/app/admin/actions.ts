@@ -46,6 +46,7 @@ export interface ProductInput {
   promoDiscount: number;
   promoType: "flat" | "percent";
   promoExpiry: string;
+  returnDays: number;
   isFeatured: boolean;
   isNew: boolean;
   isBestseller: boolean;
@@ -113,6 +114,7 @@ function productRow(input: ProductInput, id: string) {
     promo_discount: input.promoDiscount,
     promo_type: input.promoType,
     promo_expiry: input.promoExpiry || null,
+    return_days: input.returnDays,
     is_featured: input.isFeatured,
     is_new: input.isNew,
     is_bestseller: input.isBestseller,
