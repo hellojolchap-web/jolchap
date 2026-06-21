@@ -11,6 +11,22 @@ import type { MenuItem } from "@/lib/settings"; // type-only — no runtime cycl
 const env = (key: string, fallback: string) =>
   (process.env[key] && process.env[key]!.trim()) || fallback;
 
+/**
+ * The canonical production origin — feeds metadataBase, canonical, og:image,
+ * sitemap and robots. Resolution order:
+ *   1. NEXT_PUBLIC_SITE_URL (set this in Vercel to your exact live domain)
+ *   2. VERCEL_PROJECT_PRODUCTION_URL — Vercel's production domain, so OG/canonical
+ *      auto-point at the real deployed host even if the env var isn't set
+ *   3. the built-in default
+ */
+function resolveSiteUrl(): string {
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (explicit) return explicit.replace(/\/+$/, "");
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (vercel) return `https://${vercel.replace(/^https?:\/\//, "").replace(/\/+$/, "")}`;
+  return "https://jolchap.com.bd";
+}
+
 export const siteConfig = {
   name: "Jolchap",
   legalName: "Jolchap Lifestyle",
@@ -19,7 +35,7 @@ export const siteConfig = {
     "Custom seals & stamps, personalised apparel, mugs, bags and gifts — designed with you and made to order in Dhaka.",
   description:
     "Jolchap is a Dhaka-based custom print & personalisation studio. From rubber stamps and wax seals to printed t-shirts, photo mugs, tote bags and gifts — we turn your idea into something you can hold. Free design preview, nationwide delivery.",
-  url: env("NEXT_PUBLIC_SITE_URL", "https://jolchap.com.bd"),
+  url: resolveSiteUrl(),
   established: 2019,
   ogImage: "/images/og/jolchap-og.webp",
 
