@@ -124,7 +124,7 @@ const config: Config = {
         "fade-up": "fade-up 0.7s cubic-bezier(0.22,1,0.36,1) both",
         marquee: "marquee 32s linear infinite",
         "marquee-rev": "marquee-rev 32s linear infinite",
-        float: "float 6s ease-in-out infinite",
+        float: "float 9s ease-in-out infinite",
         "pulse-ring": "pulse-ring 2.4s cubic-bezier(0.4,0,0.2,1) infinite",
         "spin-slow": "spin-slow 14s linear infinite",
       },
