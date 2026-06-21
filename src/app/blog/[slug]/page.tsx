@@ -16,6 +16,8 @@ import { siteConfig } from "@/config/site";
 import { pageMetadata, blogPostingLd, breadcrumbLd } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 
+export const revalidate = 3600;
+
 /* ── Static params ────────────────────────────────────────────────── */
 export async function generateStaticParams() {
   const posts = await getBlogPosts();
@@ -39,6 +41,7 @@ export async function generateMetadata({
     type: "article",
     publishedTime: post.publishedAt,
     modifiedTime: post.publishedAt,
+    keywords: post.tags,
   });
 }
 

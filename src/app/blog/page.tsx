@@ -10,7 +10,8 @@ import { Reveal } from "@/components/ui/Reveal";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { Pagination } from "@/components/ui/Pagination";
 import { formatDate, clamp } from "@/lib/utils";
-import { pageMetadata } from "@/lib/seo";
+import { pageMetadata, breadcrumbLd } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
 
 export const metadata = pageMetadata({
   title: "The Jolchap Journal",
@@ -45,6 +46,12 @@ export default async function BlogPage({
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbLd([
+          { name: "Home", path: "/" },
+          { name: "The Jolchap Journal", path: "/blog" },
+        ])}
+      />
       <PageHeader
         kicker="The Jolchap Journal"
         title="Ideas worth printing."

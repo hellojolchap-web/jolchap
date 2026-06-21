@@ -15,12 +15,15 @@ import {
   getRelatedProducts,
 } from "@/lib/queries";
 import { siteConfig } from "@/config/site";
-import { pageMetadata, breadcrumbLd } from "@/lib/seo";
+import { pageMetadata, breadcrumbLd, absoluteUrl } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
+
+// ISR: stay static but refresh price/availability/metadata hourly.
+export const revalidate = 3600;
 
 export async function generateStaticParams() {
   const products = await getProducts();
@@ -38,6 +41,7 @@ export async function generateMetadata({
     title: product.name,
     description: product.shortDescription,
     path: `/product/${product.slug}`,
+    keywords: [product.name, product.categoryName, ...product.tags].filter(Boolean),
   });
 }
 
@@ -49,19 +53,28 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const related = await getRelatedProducts(product, 4);
 
   // Product schema for rich results.
+  const productUrl = absoluteUrl(`/product/${product.slug}`);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
+    "@id": `${productUrl}#product`,
     name: product.name,
-    image: product.images,
+    image: product.images.map((i) => (i.startsWith("http") ? i : absoluteUrl(i))),
     description: product.shortDescription,
     sku: product.id,
+    url: productUrl,
     brand: { "@type": "Brand", name: siteConfig.name },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: product.rating,
-      reviewCount: product.reviewCount,
-    },
+    // Only emit aggregateRating once there are real reviews — an empty rating
+    // is invalid schema and triggers Google rich-result errors.
+    ...(product.reviewCount > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: product.rating,
+            reviewCount: product.reviewCount,
+          },
+        }
+      : {}),
     offers: {
       "@type": "Offer",
       price: product.price,
@@ -69,7 +82,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       availability: product.inStock
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
-      url: `${siteConfig.url}/product/${product.slug}`,
+      url: productUrl,
     },
   };
 

@@ -19,6 +19,5 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     eyebrow: product.categoryName,
     title: product.name,
     chip: formatPrice(product.price, product.currency),
-    footer: "jolchap.com.bd",
   });
 }

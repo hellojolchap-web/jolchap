@@ -2,7 +2,8 @@ import { Suspense } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ShopBrowser } from "@/components/commerce/ShopBrowser";
 import { getCategories, getProducts } from "@/lib/queries";
-import { pageMetadata } from "@/lib/seo";
+import { pageMetadata, breadcrumbLd } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
 
 export const metadata = pageMetadata({
   title: "Shop All Products",
@@ -24,6 +25,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbLd([
+          { name: "Home", path: "/" },
+          { name: "Shop", path: "/shop" },
+        ])}
+      />
       <PageHeader
         kicker="All products"
         title="Everything we make."

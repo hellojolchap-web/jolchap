@@ -21,6 +21,8 @@ interface CategoryPageProps {
   searchParams: Promise<{ type?: string }>;
 }
 
+export const revalidate = 3600;
+
 export async function generateStaticParams() {
   const categories = await getCategories();
   return categories.map((c) => ({ slug: c.slug }));
@@ -37,6 +39,7 @@ export async function generateMetadata({
     title: category.name,
     description: category.description,
     path: `/category/${category.slug}`,
+    keywords: [category.name, category.tagline].filter(Boolean),
   });
 }
 

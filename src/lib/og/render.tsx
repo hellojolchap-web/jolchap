@@ -19,6 +19,16 @@ const TEAL = "#0E8388";
 const TEAL_LIGHT = "#2FB4B6";
 const TEAL_BRIGHT = "#3FD0CE";
 
+// Footer host derived from the configured site URL, so cards always show the
+// real domain (set NEXT_PUBLIC_SITE_URL to your production origin).
+const OG_HOST = (() => {
+  try {
+    return new URL(siteConfig.url).host;
+  } catch {
+    return "jolchap.com.bd";
+  }
+})();
+
 async function loadFonts() {
   // Read the bundled woff files from disk (works during prerender + on the
   // Node serverless runtime; the files are traced in via next.config).
@@ -189,7 +199,7 @@ export async function renderOgImage({ eyebrow, title, chip, footer }: OgInput) {
             ) : null}
           </div>
           <div style={{ fontSize: "24px", fontWeight: 500, color: "#9FACB6" }}>
-            {footer ?? "jolchap.com.bd"}
+            {footer ?? OG_HOST}
           </div>
         </div>
       </div>
