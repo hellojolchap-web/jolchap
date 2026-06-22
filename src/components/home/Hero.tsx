@@ -137,7 +137,6 @@ function BannerSlideshow({
   autoplay: boolean;
 }) {
   const [idx, setIdx] = useState(0);
-  const [ratios, setRatios] = useState<Record<number, number>>({});
 
   useEffect(() => {
     if (!autoplay || images.length < 2) return;
@@ -145,15 +144,12 @@ function BannerSlideshow({
     return () => clearInterval(t);
   }, [autoplay, images.length]);
 
-  const ratio = ratios[idx];
-
   return (
     <div
       className={cn(
-        "relative mx-auto w-full overflow-hidden rounded-[2rem] bg-bone shadow-elevated transition-[aspect-ratio] duration-500 ease-out",
+        "relative mx-auto aspect-[4/3] w-full overflow-hidden rounded-[2rem] bg-onyx-100 shadow-elevated",
         float && "animate-float"
       )}
-      style={{ aspectRatio: ratio ? String(ratio) : "4 / 5" }}
     >
       {images.map((src, i) => (
         // eslint-disable-next-line @next/next/no-img-element
@@ -161,15 +157,8 @@ function BannerSlideshow({
           key={`${src}-${i}`}
           src={src}
           alt=""
-          onLoad={(e) => {
-            const el = e.currentTarget;
-            if (el.naturalWidth && el.naturalHeight) {
-              const r = el.naturalWidth / el.naturalHeight;
-              setRatios((prev) => (prev[i] ? prev : { ...prev, [i]: r }));
-            }
-          }}
           className={cn(
-            "absolute inset-0 h-full w-full object-contain transition-opacity duration-700",
+            "absolute inset-0 h-full w-full object-cover transition-opacity duration-700",
             i === idx ? "opacity-100" : "opacity-0"
           )}
         />
